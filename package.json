@@ -1,0 +1,22 @@
+{
+  "name": "pioneer-portal-v3-client",
+  "version": "3.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^6.0.0",
+    "@babylonjs/gui": "^6.0.0",
+    "@babylonjs/loaders": "^6.0.0",
+    "firebase": "^10.0.0",
+    "socket.io-client": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.37",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21"
+  }
+}

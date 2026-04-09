@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pioneer Admin Dashboard - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .login-container {
+            background: rgba(45, 45, 45, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid #00ff00;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .login-container h1 {
+            color: #00ff00;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .login-container h1 small {
+            font-size: 12px;
+            color: #aaa;
+            display: block;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: #3d3d3d;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 5px rgba(0,255,0,0.3);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        
+        .error-message {
+            background: rgba(255,77,77,0.2);
+            border: 1px solid #ff4d4d;
+            color: #ff4d4d;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .info-text {
+            text-align: center;
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        
+        .info-text a {
+            color: #00ff00;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>
+            🚀 Pioneer Admin<br>
+            <small>Dashboard Login</small>
+        </h1>
+        
+        <div id="errorMsg" class="error-message" style="display: none;"></div>
+        
+        <div class="input-group">
+            <label>👤 Username</label>
+            <input type="text" id="username" placeholder="Masukkan username admin" autocomplete="off">
+        </div>
+        
+        <div class="input-group">
+            <label>🔒 Password</label>
+            <input type="password" id="password" placeholder="Masukkan password" onkeypress="if(event.key==='Enter') login()">
+        </div>
+        
+        <button onclick="login()">🔐 LOGIN</button>
+        
+        <div class="info-text">
+            <strong>Akun Demo:</strong><br>
+            admin1 / 123456<br>
+            admin2 / 000000<br>
+            admin3 / 999999
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = "https://f75d9c6d-8a1f-441c-84e8-4c3c3764296a-00-2d0b4ng7svqyl.sisko.replit.dev";
+        
+        async function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showError('Username dan password harus diisi!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Simpan token dan info admin
+                    localStorage.setItem('admin_token', result.token);
+                    localStorage.setItem('admin_info', JSON.stringify(result.admin));
+                    
+                    // Redirect ke dashboard
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    showError(result.message || 'Login gagal!');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                showError('Gagal terhubung ke server!');
+            }
+        }
+        
+        function showError(msg) {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = msg;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Cek apakah sudah login
+        const token = localStorage.getItem('admin_token');
+        if (token) {
+            // Coba redirect ke dashboard
+            window.location.href = 'admin-dashboard.html';
+        }
+    </script>
+</body>
+</html>
