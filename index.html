@@ -1,172 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pioneer Portal V3 - Virtual Classroom</title>
-    <style>
-        html,
-        body {
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: #1a1a1a;
-            /* Warna background gelap elegan */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        #renderCanvas {
-            width: 100%;
-            height: 100%;
-            touch-action: none;
-            outline: none;
-            /* Supaya canvas gak goyang pas di-swipe jempol */
-            /* touch-action: none; */
-            -webkit-user-select: none;
-            user-select: none;
+  <title>Campus3D — Immersive Learning Platform</title>
 
-        }
+  <!-- Tailwind CDN (dev only) -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        /* Overlay Login */
-        #ui-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 10;
-            transition: opacity 0.5s ease;
-        }
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
-        .login-card {
-            background: #2d2d2d;
-            padding: 2rem;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid #444;
-        }
+  <style>
+    :root {
+      --primary: #00CED1;
+      --bg-dark: #020617;
+    }
 
-        h1 {
-            color: #00d2ff;
-            margin-bottom: 0.5rem;
-        }
+    body {
+      margin: 0;
+      background: var(--bg-dark);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: white;
+      overflow-x: hidden;
+    }
 
-        p {
-            color: #ccc;
-            margin-bottom: 2rem;
-        }
+    /* 🔥 APP ROOT */
+    #app {
+      height: 100vh;
+      overflow-y: auto;
+    }
 
-        #login-btn {
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
-        }
+    /* 🔥 LANDING */
+    #landing-page {
+      position: relative;
+      min-height: 100vh;
+      background: radial-gradient(circle at center, #083344 0%, #020617 100%);
+    }
 
-        #login-btn:hover {
-            background-color: #357ae8;
-            transform: scale(1.05);
-        }
+    /* 🔥 GLASS CARD */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-        /* Status Audio */
-        #audio-status {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            pointer-events: none;
-        }
-
-        /* Container untuk joystick */
-        .joystick-container {
-            position: absolute;
-            bottom: 50px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 40px;
-            box-sizing: border-box;
-            pointer-events: none;
-            /* Supaya nggak nge-blok klik di area lain */
-            z-index: 10;
-        }
-
-        /* Bulatan Joystick */
-        .joystick {
-            width: 120px;
-            height: 120px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            pointer-events: auto;
-            /* Aktifkan sentuhan khusus di sini */
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            touch-action: none;
-        }
-
-        /* Supaya tulisan kapasitas gak kegeser-geser */
-        #capacity-indicator {
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-    </style>
+    /* 🔥 OVERLAY */
+    #ui-overlay {
+      position: fixed;
+      inset: 0;
+      background: #020617;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+  </style>
 </head>
 
 <body>
 
-    <div id="ui-overlay">
-        <div class="login-card">
-            <h1>PIONEER PORTAL V3</h1>
-            <p>Selamat datang di Kelas Virtual Masa Depan</p>
-            <button id="login-btn">Masuk dengan Google</button>
-            <button id="logout-btn"
-                style="display: none; position: absolute; top: 20px; right: 20px; z-index: 20; background: #ff4757; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                Keluar Kelas
-            </button>
-        </div>
-    </div>
-    <div id="capacity-indicator" style="
-    position: absolute; 
-    top: 20px; 
-    right: 20px; 
-    background: rgba(0,0,0,0.6); 
-    color: #00ff00; 
-    padding: 10px 15px; 
-    border-radius: 8px; 
-    font-family: 'Courier New', monospace;
-    border: 1px solid #00ff00;
-    pointer-events: none;
-    z-index: 100;
-">
-        Kapasitas: <span id="current-cap">0</span>/<span id="max-cap">10</span>
-    </div>
-    <canvas id="renderCanvas" style="touch-action: none; -webkit-user-select: none;"></canvas>
-    <div class="joystick-container" id="mobile-controls" style="display: none;">
-        <div id="leftJoystick" class="joystick"></div>
+  <!-- ================= LANDING ================= -->
+  <div id="landing-page">
 
-        <div id="rightJoystick" class="joystick"></div>
-    </div>
+    <!-- HEADER -->
+    <header class="flex justify-between items-center px-8 py-5 border-b border-white/5">
+      <h1 class="text-2xl font-extrabold">
+        CAMPUS<span class="text-[#00CED1]">3D</span>
+      </h1>
+    </header>
 
-    <div id="audio-status">Status: Menunggu Interaksi...</div>
+    <!-- HERO -->
+    <section class="pt-24 pb-16 px-6 text-center">
 
-    <script type="module" src="/src/main.ts"></script>
+      <h2 class="text-5xl font-extrabold mb-6 leading-tight">
+        Campus3D Makes it Real
+      </h2>
+
+      <p class="text-gray-400 max-w-xl mx-auto">
+        Platform pembelajaran imersif berbasis 3D langsung dari browser.
+        Belajar, berinteraksi, dan berkembang dalam dunia digital nyata.
+      </p>
+
+      <!-- ROLE BUTTON -->
+      <div class="mt-10 flex flex-col gap-4 items-center">
+
+        <button id="teacherBtn"
+          class="bg-[#00CED1] text-black px-8 py-4 rounded-xl font-bold hover:scale-105 transition">
+          Jadi Pengajar
+        </button>
+
+        <button id="studentBtn"
+          class="border border-[#00CED1] px-8 py-4 rounded-xl hover:bg-white/5 transition">
+          Jadi Siswa
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- 🔥 CLASS SECTION -->
+    <section id="classes" class="pb-20 px-6">
+
+      <h2 class="text-3xl font-bold text-center mb-10">
+        Kelas di Campus3D
+      </h2>
+
+      <div id="landingClasses"
+        class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- ================= APP ROOT ================= -->
+  <div id="app"></div>
+
+  <!-- ================= OVERLAY ================= -->
+  <div id="ui-overlay">
+    <p class="text-[#00CED1] font-bold text-lg animate-pulse">
+      Loading...
+    </p>
+  </div>
+
+  <!-- ================= MAIN ENTRY ================= -->
+  <script type="module" src="/src/main.ts"></script>
 
 </body>
 

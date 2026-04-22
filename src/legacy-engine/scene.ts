@@ -5,8 +5,8 @@ async function loadEnvironment(scene: Scene) {
     try {
         // Kita hapus pembuatan lampu di sini karena sudah ada di createPioneerScene
         // const fileName = "classroom.glb";
-        
-         const fileName = "zen_studio.glb";
+
+        const fileName = "classroom.glb";
 
         const result = await SceneLoader.ImportMeshAsync(
             "",
@@ -79,6 +79,8 @@ async function loadEnvironment(scene: Scene) {
 }
 
 export async function createPioneerScene(canvasId: string) {
+    //debug
+
     const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
     if (!canvas) {
         throw new Error(`Canvas dengan id ${canvasId} tidak ditemukan!`);
@@ -100,8 +102,15 @@ export async function createPioneerScene(canvasId: string) {
     // Lampu Tunggal (Cukup satu saja agar tidak terlalu terang)
     new HemisphericLight("light", new Vector3(0, 1, 0), scene);
 
+    //debug
     // Panggil Load Environment
     await loadEnvironment(scene);
+    engine.runRenderLoop(() => {
+        scene.render();
+    });
 
+    window.addEventListener("resize", () => {
+        engine.resize();
+    });
     return { scene, engine, camera, canvas };
 }

@@ -17,8 +17,10 @@ export default defineConfig({
     https: {
       // Untuk development, kita bisa menggunakan self-signed certificate
       // Atau comment bagian ini jika tidak perlu HTTPS di client
-      key: fs.readFileSync(path.resolve(__dirname, '../virtual-classroom-v3-5-Server/cert/localhost+2-key.pem')),
-      cert: fs.readFileSync(path.resolve(__dirname, '../virtual-classroom-v3-5-Server/cert/localhost+2.pem')),
+      // key: fs.readFileSync(path.resolve(__dirname, '../virtual-classroom-v3-5-Server/cert/localhost+2-key.pem')),
+      // cert: fs.readFileSync(path.resolve(__dirname, '../virtual-classroom-v3-5-Server/cert/localhost+2.pem')),
+      key: fs.readFileSync(path.resolve(__dirname, 'cert/localhost+2-key.pem')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'cert/localhost+2.pem')),
     },
     proxy: {
       '/socket.io': {

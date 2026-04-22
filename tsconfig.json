@@ -9,7 +9,7 @@
       "@/*": ["src/*"],
       "@shared/*": ["shared/*"]
     },
-    "allowImportingTsExtensions": true,
+    // "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
