@@ -1,7 +1,8 @@
 import { getClasses } from "./modules/class";
 import { formatRupiah } from "./utils/format";
 import { login } from "./firebase/auth";
-
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "./firebase/config";
 // =====================================
 // 🔐 INIT LANDING BUTTONS
 // =====================================

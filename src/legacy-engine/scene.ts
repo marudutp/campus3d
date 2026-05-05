@@ -114,3 +114,28 @@ export async function createPioneerScene(canvasId: string) {
     });
     return { scene, engine, camera, canvas };
 }
+
+function spawnParticipants(scene: Scene, participants: any[]) {
+    let studentIndex = 0;
+
+    participants.forEach(p => {
+        let position;
+
+        if (p.role === "teacher") {
+            position = new Vector3(0, 0, -3); // panggung
+        } else {
+            const x = (studentIndex % 5) * 2 - 4;
+            const z = Math.floor(studentIndex / 5) * 2 + 3;
+            position = new Vector3(x, 0, z);
+            studentIndex++;
+        }
+
+        const avatar = MeshBuilder.CreateCapsule(p.userId, { height: 2 }, scene);
+        avatar.position = position;
+
+        avatar.metadata = {
+            userId: p.userId,
+            role: p.role
+        };
+    });
+}

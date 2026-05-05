@@ -1,32 +1,36 @@
 import * as BABYLON from "@babylonjs/core";
-
-// GANTI YANG LAMA DENGAN INI:
 import { AUDIO_CONFIG } from "@shared/constants";
+import { io, Socket } from "socket.io-client";
+
 export class VoiceManager {
     private scene: BABYLON.Scene;
     private remoteSounds: Map<string, BABYLON.Sound> = new Map();
     private isUnlocked: boolean = false;
+
+    private localStream: MediaStream | null = null;
+    private isMuted: boolean = false;
+
+    private socket: Socket | null = null;
+    private classId: string = "";
+    private userId: string = "";
 
     constructor(scene: BABYLON.Scene) {
         this.scene = scene;
         this.setupAudioUnlocker();
     }
 
-    /**
-     * MEKANISME AUDIO UNLOCKER
-     * Menembus kebijakan Autoplay browser, Ferguso!
-     */
+    // =====================================
+    // 🔓 AUDIO UNLOCK
+    // =====================================
     private setupAudioUnlocker() {
         const unlock = () => {
             if (this.isUnlocked) return;
-            
-            // Resume Audio Context Babylon
+
             if (BABYLON.Engine.audioEngine) {
                 BABYLON.Engine.audioEngine.unlock();
-                console.log("Audio Engine Unlocked! Siap dengerin gosip di kelas...");
+                console.log("🔊 Audio Engine Unlocked!");
                 this.isUnlocked = true;
-                
-                // Hapus listener biar hemat memori
+
                 window.removeEventListener("pointerdown", unlock);
                 window.removeEventListener("keydown", unlock);
             }
@@ -36,51 +40,139 @@ export class VoiceManager {
         window.addEventListener("keydown", unlock);
     }
 
-    /**
-     * Memasang Stream Suara ke Avatar (Spatial Audio)
-     * @param uid ID pemilik suara
-     * @param stream MediaStream dari WebRTC
-     * @param mesh Mesh avatar lawan agar suara 'menempel' di sana
-     */
-    public addRemoteStream(uid: string, stream: MediaStream, mesh: BABYLON.AbstractMesh) {
-        // Jika sudah ada sound untuk UID ini, hapus dulu yang lama
+    // =====================================
+    // 🎤 INIT LOCAL MIC + CONNECT SERVER
+    // =====================================
+    public async init(
+        classId: string,
+        userId: string,
+        audioServerUrl: string
+    ) {
+        this.classId = classId;
+        this.userId = userId;
+
+        try {
+            this.localStream = await navigator.mediaDevices.getUserMedia({
+                audio: true
+            });
+
+            console.log("🎤 Mic ready");
+
+        } catch (err) {
+            console.error("❌ Mic error:", err);
+        }
+
+        // CONNECT SOCKET
+        this.socket = io(audioServerUrl);
+
+        this.socket.emit("join-room", {
+            classId,
+            userId
+        });
+
+        console.log("🎧 Connected to audio server");
+
+        // LISTEN CONTROL (MUTE / UNMUTE)
+        this.socket.on("audio-control", (data: any) => {
+            const { action, scope, targetUserId } = data;
+
+            if (scope === "all") {
+                if (action === "mute") this.muteLocal();
+                if (action === "unmute") this.unmuteLocal();
+            }
+
+            if (scope === "user" && targetUserId === this.userId) {
+                if (action === "mute") this.muteLocal();
+                if (action === "unmute") this.unmuteLocal();
+            }
+        });
+    }
+
+    // =====================================
+    // 🔇 LOCAL MUTE CONTROL
+    // =====================================
+    public muteLocal() {
+        if (!this.localStream) return;
+
+        this.localStream.getAudioTracks().forEach(track => {
+            track.enabled = false;
+        });
+
+        this.isMuted = true;
+        console.log("🔇 Mic muted");
+    }
+
+    public unmuteLocal() {
+        if (!this.localStream) return;
+
+        this.localStream.getAudioTracks().forEach(track => {
+            track.enabled = true;
+        });
+
+        this.isMuted = false;
+        console.log("🔊 Mic unmuted");
+    }
+
+    public toggleMute() {
+        if (this.isMuted) {
+            this.unmuteLocal();
+        } else {
+            this.muteLocal();
+        }
+    }
+
+    // =====================================
+    // 🎧 REMOTE AUDIO (SPATIAL)
+    // =====================================
+    public addRemoteStream(
+        uid: string,
+        stream: MediaStream,
+        mesh: BABYLON.AbstractMesh
+    ) {
         if (this.remoteSounds.has(uid)) {
             this.remoteSounds.get(uid)?.dispose();
         }
 
-        console.log(`Menghubungkan Spatial Audio untuk user: ${uid}`);
+        console.log(`🎧 Attach audio: ${uid}`);
 
-        // Buat sound object Babylon
         const remoteSound = new BABYLON.Sound(
             `voice-${uid}`,
             stream,
             this.scene,
-            null, 
+            null,
             {
                 streaming: true,
                 autoplay: true,
-                spatialSound: true, // AKTIFKAN SPATIAL AUDIO!
+                spatialSound: true,
                 maxDistance: AUDIO_CONFIG.MAX_DISTANCE,
                 refDistance: AUDIO_CONFIG.REF_DISTANCE,
                 rolloffFactor: AUDIO_CONFIG.ROLLOFF_FACTOR,
-                distanceModel: "exponential" // Suara mengecil secara alami
+                distanceModel: "exponential"
             }
         );
 
-        // Tempelkan suara ke hidung avatarnya, Ferguso!
         remoteSound.attachToMesh(mesh);
-        
+
         this.remoteSounds.set(uid, remoteSound);
     }
 
-    /**
-     * Bersihkan suara saat user keluar
-     */
+    // =====================================
+    // 🧹 CLEANUP
+    // =====================================
     public removeRemoteStream(uid: string) {
         if (this.remoteSounds.has(uid)) {
             this.remoteSounds.get(uid)?.dispose();
             this.remoteSounds.delete(uid);
-            console.log(`Suara user ${uid} sudah dimatikan.`);
+            console.log(`🔕 Removed audio: ${uid}`);
+        }
+    }
+
+    public dispose() {
+        this.remoteSounds.forEach(s => s.dispose());
+        this.remoteSounds.clear();
+
+        if (this.socket) {
+            this.socket.disconnect();
         }
     }
 }

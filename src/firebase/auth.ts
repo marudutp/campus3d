@@ -30,12 +30,28 @@ export function initAuth() {
   console.log("Auth ready");
 }
 
+// export async function login() {
+//   const provider = new GoogleAuthProvider();
+
+//   await setPersistence(auth, browserLocalPersistence);
+
+//   const result = await signInWithPopup(auth, provider);
+
+//   return result.user;
+// }
 export async function login() {
   const provider = new GoogleAuthProvider();
+
+  // 🔥 WAJIB: paksa pilih akun setiap login
+  provider.setCustomParameters({
+    prompt: "select_account"
+  });
 
   await setPersistence(auth, browserLocalPersistence);
 
   const result = await signInWithPopup(auth, provider);
+
+  console.log("✅ Login user:", result.user.email);
 
   return result.user;
 }

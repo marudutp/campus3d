@@ -1,13 +1,11 @@
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { currentUser } from "../firebase/auth";
 
 import { createPioneerScene } from "../legacy-engine/scene";
 import { io } from "socket.io-client";
-import { Vector3, Mesh, MeshBuilder } from "@babylonjs/core";
+import { Vector3, Mesh } from "@babylonjs/core";
 import { VoiceManager } from "../legacy-engine/voice/VoiceManager";
-import { updateDoc, deleteField } from "firebase/firestore";
-
 // optional nanti:
 /// import { NetworkManager } from "../network/NetworkManager";
 
@@ -48,24 +46,6 @@ export async function loadClassroom() {
       classId
     );
 
-  await setDoc(
-    sessionRef,
-    {
-      participants: {
-        [user.uid]: {
-          uid: user.uid,
-          role: localStorage.getItem("role") || "student",
-          joinedAt: Date.now()
-        }
-      }
-    },
-    { merge: true }
-  );
-
-  await updateDoc(sessionRef, {
-    [`participants.${user.uid}`]: deleteField()
-  });
-
   const sessionSnap =
     await getDoc(
       sessionRef
@@ -90,10 +70,6 @@ export async function loadClassroom() {
       `/waiting-room.html?classId=${classId}`;
     return;
   }
-
-
-
-
 
   // ====================================
   // UI SHELL
@@ -160,17 +136,12 @@ export async function loadClassroom() {
       user!.uid,
       "https://localhost:8081"
     );
-    console.log("🎧 Voice initialized");
-
-    // simpan biar bisa dipakai tombol mute dll
-    (window as any).voice = voice;
-
 
 
     initMovement(
       result.scene,
       classId,
-      user!
+      user.uid
     );
     // future:
     // initMovement(result.scene, classId, user);
@@ -207,26 +178,6 @@ export async function loadClassroom() {
 // ====================================
 // HELPER
 // ====================================
-function spawnAvatar(scene: any, data: any) {
-  let avatar = scene.getMeshByName(data.uid);
-
-  if (avatar) return;
-
-  avatar = MeshBuilder.CreateCapsule(
-    data.uid,
-    { height: 2 },
-    scene
-  );
-
-  avatar.position = new Vector3(
-    data.x || 0,
-    data.y || 0,
-    data.z || 0
-  );
-
-  console.log("🧍 Spawn avatar:", data.uid);
-}
-
 function errorBox(
   text: string
 ) {
@@ -239,33 +190,20 @@ function errorBox(
 function initMovement(
   scene: any,
   classId: string,
-  user: any
+  userId: string
 ) {
   const socket = io("https://localhost:8080");
 
   // ====================================
   // JOIN ROOM
   // ====================================
-  // socket.emit("join-room", {
-  //   classId,
-  //   userId
-  // });
-  socket.emit("auth_join", {
-    uid: user.uid,
-    displayName: user.displayName || "Guest",
-    role: localStorage.getItem("role") || "student"
+  socket.emit("join-room", {
+    classId,
+    userId
   });
+
   console.log("🚀 Connected to movement server");
 
-  socket.on("currentPlayers", (players: any) => {
-    console.log("👥 currentPlayers:", players);
-
-    Object.values(players).forEach((p: any) => {
-      if (p.uid === user.uid) return;
-
-      spawnAvatar(scene, p);
-    });
-  });
   // ====================================
   // LOCAL PLAYER (CAMERA TARGET)
   // ====================================
@@ -281,7 +219,7 @@ function initMovement(
 
     socket.emit("move", {
       classId,
-      user,
+      userId,
       position: {
         x: pos.x,
         y: pos.y,
@@ -293,50 +231,33 @@ function initMovement(
   // ====================================
   // RECEIVE PLAYER MOVEMENT
   // ====================================
-  // socket.on("player-move", (data: any) => {
-  //   const { userId: otherId, position } = data;
+  socket.on("player-move", (data: any) => {
+    const { userId: otherId, position } = data;
 
-  //   if (otherId === userId) return;
+    if (otherId === userId) return;
 
-  //   let avatar = scene.getMeshByName(otherId);
+    let avatar = scene.getMeshByName(otherId);
 
-  //   // kalau belum ada → spawn sederhana
-  //   if (!avatar) {
-  //     avatar = Mesh.CreateCapsule(
-  //       otherId,
-  //       { height: 2 },
-  //       scene
-  //     );
+    // kalau belum ada → spawn sederhana
+    if (!avatar) {
+      avatar = Mesh.CreateCapsule(
+        otherId,
+        { height: 2 },
+        scene
+      );
 
-  //     avatar.position = new Vector3(
-  //       position.x,
-  //       position.y,
-  //       position.z
-  //     );
-  //   } else {
-  //     avatar.position.set(
-  //       position.x,
-  //       position.y,
-  //       position.z
-  //     );
-  //   }
-  // });
-  socket.on("avatar_update", (data: any) => {
-    const avatar = scene.getMeshByName(data.uid);
-    if (!avatar) return;
-
-    avatar.position.set(
-      data.position.x,
-      data.position.y,
-      data.position.z
-    );
-  });
-
-  socket.on("user_left", (uid: string) => {
-    const avatar = scene.getMeshByName(uid);
-    if (avatar) avatar.dispose();
-
-    console.log("❌ Remove avatar:", uid);
+      avatar.position = new Vector3(
+        position.x,
+        position.y,
+        position.z
+      );
+    } else {
+      avatar.position.set(
+        position.x,
+        position.y,
+        position.z
+      );
+    }
   });
 
   // ====================================

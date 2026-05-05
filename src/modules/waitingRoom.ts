@@ -82,20 +82,36 @@ export async function getSession(
 // START CLASS
 // waiting -> live
 // ======================================
-export async function startSession(
-  classId: string
-) {
-  const ref = doc(
-    db,
-    "sessions",
-    classId
-  );
+// export async function startSession(
+//   classId: string
+// ) {
+//   const ref = doc(
+//     db,
+//     "sessions",
+//     classId
+//   );
 
-  await updateDoc(ref, {
-    status: "live",
-    startedAt:
-      serverTimestamp()
-  });
+//   await updateDoc(ref, {
+//     status: "live",
+//     startedAt:
+//       serverTimestamp()
+//   });
+// }
+
+//040526
+
+export async function startSession(classId: string) {
+  const sessionRef = doc(db, "sessions", classId);
+
+  await setDoc(
+    sessionRef,
+    {
+      status: "live",
+      classId,
+      startedAt: Date.now()
+    },
+    { merge: true }
+  );
 }
 
 // ======================================

@@ -1,63 +1,178 @@
-// src/voice/VoiceManager.ts
+import * as BABYLON from "@babylonjs/core";
+import { AUDIO_CONFIG } from "@shared/constants";
+import { io, Socket } from "socket.io-client";
 
 export class VoiceManager {
-    private stream: MediaStream | null = null;
-    private peers: Record<string, HTMLAudioElement> = {};
+    private scene: BABYLON.Scene;
+    private remoteSounds: Map<string, BABYLON.Sound> = new Map();
+    private isUnlocked: boolean = false;
 
-    async init(): Promise<MediaStream> {
-        this.stream = await navigator.mediaDevices.getUserMedia({ 
-            audio: { echoCancellation: true, noiseSuppression: true } 
-        });
-        return this.stream;
+    private localStream: MediaStream | null = null;
+    private isMuted: boolean = false;
+
+    private socket: Socket | null = null;
+    private classId: string = "";
+    private userId: string = "";
+
+    constructor(scene: BABYLON.Scene) {
+        this.scene = scene;
+        this.setupAudioUnlocker();
     }
 
-    registerPeer(id: string, stream: MediaStream) {
-        // Jika ID ini sudah ada, hapus dulu supaya bersih
-        this.removePeer(id);
+    // =====================================
+    // 🔓 AUDIO UNLOCK
+    // =====================================
+    private setupAudioUnlocker() {
+        const unlock = () => {
+            if (this.isUnlocked) return;
 
-        const audio = document.createElement("audio");
-        audio.srcObject = stream;
-        audio.autoplay = true;
-        audio.id = `audio-${id}`;
-        audio.style.display = "none";
-        
-        this.peers[id] = audio;
-        document.body.appendChild(audio);
+            if (BABYLON.Engine.audioEngine) {
+                BABYLON.Engine.audioEngine.unlock();
+                console.log("🔊 Audio Engine Unlocked!");
+                this.isUnlocked = true;
 
-        audio.play().catch(() => {
-            console.warn(`⚠️ Menunggu klik user untuk audio: ${id}`);
-            const unlock = () => { audio.play(); window.removeEventListener("pointerdown", unlock); };
-            window.addEventListener("pointerdown", unlock);
+                window.removeEventListener("pointerdown", unlock);
+                window.removeEventListener("keydown", unlock);
+            }
+        };
+
+        window.addEventListener("pointerdown", unlock);
+        window.addEventListener("keydown", unlock);
+    }
+
+    // =====================================
+    // 🎤 INIT LOCAL MIC + CONNECT SERVER
+    // =====================================
+    public async init(
+        classId: string,
+        userId: string,
+        audioServerUrl: string
+    ) {
+        this.classId = classId;
+        this.userId = userId;
+
+        try {
+            this.localStream = await navigator.mediaDevices.getUserMedia({
+                audio: true
+            });
+
+            console.log("🎤 Mic ready");
+
+        } catch (err) {
+            console.error("❌ Mic error:", err);
+        }
+
+        // CONNECT SOCKET
+        this.socket = io(audioServerUrl);
+
+        this.socket.emit("join-room", {
+            classId,
+            userId
+        });
+
+        console.log("🎧 Connected to audio server");
+
+        // LISTEN CONTROL (MUTE / UNMUTE)
+        this.socket.on("audio-control", (data: any) => {
+            const { action, scope, targetUserId } = data;
+
+            if (scope === "all") {
+                if (action === "mute") this.muteLocal();
+                if (action === "unmute") this.unmuteLocal();
+            }
+
+            if (scope === "user" && targetUserId === this.userId) {
+                if (action === "mute") this.muteLocal();
+                if (action === "unmute") this.unmuteLocal();
+            }
         });
     }
 
-    removePeer(id: string) {
-        if (this.peers[id]) {
-            this.peers[id].pause();
-            this.peers[id].remove();
-            delete this.peers[id];
+    // =====================================
+    // 🔇 LOCAL MUTE CONTROL
+    // =====================================
+    public muteLocal() {
+        if (!this.localStream) return;
+
+        this.localStream.getAudioTracks().forEach(track => {
+            track.enabled = false;
+        });
+
+        this.isMuted = true;
+        console.log("🔇 Mic muted");
+    }
+
+    public unmuteLocal() {
+        if (!this.localStream) return;
+
+        this.localStream.getAudioTracks().forEach(track => {
+            track.enabled = true;
+        });
+
+        this.isMuted = false;
+        console.log("🔊 Mic unmuted");
+    }
+
+    public toggleMute() {
+        if (this.isMuted) {
+            this.unmuteLocal();
+        } else {
+            this.muteLocal();
         }
     }
 
-    updateSpatialAudio(localPos: any, players: Record<string, any>) {
-        const VOICE_RADIUS = 40; 
-        for (const id in this.peers) {
-            const audio = this.peers[id];
-            const remotePos = players[id]; // Ambil posisi berdasarkan ID socket yang sama
+    // =====================================
+    // 🎧 REMOTE AUDIO (SPATIAL)
+    // =====================================
+    public addRemoteStream(
+        uid: string,
+        stream: MediaStream,
+        mesh: BABYLON.AbstractMesh
+    ) {
+        if (this.remoteSounds.has(uid)) {
+            this.remoteSounds.get(uid)?.dispose();
+        }
 
-            if (!remotePos) {
-                audio.volume = 1.0; // Jika posisi ga ketemu, full-kan saja biar aman
-                continue;
+        console.log(`🎧 Attach audio: ${uid}`);
+
+        const remoteSound = new BABYLON.Sound(
+            `voice-${uid}`,
+            stream,
+            this.scene,
+            null,
+            {
+                streaming: true,
+                autoplay: true,
+                spatialSound: true,
+                maxDistance: AUDIO_CONFIG.MAX_DISTANCE,
+                refDistance: AUDIO_CONFIG.REF_DISTANCE,
+                rolloffFactor: AUDIO_CONFIG.ROLLOFF_FACTOR,
+                distanceModel: "exponential"
             }
+        );
 
-            const dist = Math.sqrt(
-                Math.pow(remotePos.x - localPos.x, 2) + 
-                Math.pow(remotePos.y - localPos.y, 2) + 
-                Math.pow(remotePos.z - localPos.z, 2)
-            );
+        remoteSound.attachToMesh(mesh);
 
-            let volume = 1 - (dist / VOICE_RADIUS);
-            audio.volume = Math.max(0, Math.min(1, volume));
+        this.remoteSounds.set(uid, remoteSound);
+    }
+
+    // =====================================
+    // 🧹 CLEANUP
+    // =====================================
+    public removeRemoteStream(uid: string) {
+        if (this.remoteSounds.has(uid)) {
+            this.remoteSounds.get(uid)?.dispose();
+            this.remoteSounds.delete(uid);
+            console.log(`🔕 Removed audio: ${uid}`);
+        }
+    }
+
+    public dispose() {
+        this.remoteSounds.forEach(s => s.dispose());
+        this.remoteSounds.clear();
+
+        if (this.socket) {
+            this.socket.disconnect();
         }
     }
 }

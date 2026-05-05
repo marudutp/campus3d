@@ -14,6 +14,9 @@ import { currentUser } from "../firebase/auth";
 // ========================================
 
 export async function loadWaitingRoom() {
+
+
+
   const app =
     document.getElementById("app")!;
 
@@ -24,7 +27,9 @@ export async function loadWaitingRoom() {
 
   const classId =
     params.get("classId");
-
+  if (classId) {
+    listenSession(classId);
+  }
   if (!classId) {
     app.innerHTML = `
       <div class="min-h-screen bg-[#020617] text-white flex items-center justify-center">
@@ -201,6 +206,13 @@ export async function loadWaitingRoom() {
         return;
       }
 
+      //040526
+      const data = snap.data();
+
+      if (data.status === "live") {
+        window.location.href = `/?page=classroom&classId=${classId}`;
+      }
+
       const session: any =
         snap.data();
 
@@ -222,13 +234,13 @@ export async function loadWaitingRoom() {
       statusText.textContent =
         capitalize(
           session.status ||
-            "waiting"
+          "waiting"
         );
 
       onlineCount.textContent =
         String(
           session.onlineCount ||
-            0
+          0
         );
 
       // ====================================
@@ -281,7 +293,7 @@ export async function loadWaitingRoom() {
       if (
         session.startAt &&
         session.status ===
-          "waiting"
+        "waiting"
       ) {
         startCountdown(
           session.startAt
@@ -291,6 +303,19 @@ export async function loadWaitingRoom() {
   );
 }
 
+function listenSession(classId: string) {
+  const ref = doc(db, "sessions", classId);
+
+  onSnapshot(ref, (snap) => {
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+
+    if (data.status === "live") {
+      window.location.href = `/?page=classroom&classId=${classId}`;
+    }
+  });
+}
 // ========================================
 // Countdown
 // ========================================
@@ -334,7 +359,7 @@ function startCountdown(
         Math.floor(
           (diff %
             60000) /
-            1000
+          1000
         );
 
       el.textContent =
@@ -363,4 +388,5 @@ function capitalize(
       .toUpperCase() +
     text.slice(1)
   );
+
 }

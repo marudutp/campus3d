@@ -4,7 +4,6 @@ import {
 } from "../modules/class";
 
 import {
-  logout,
   currentUser
 } from "../firebase/auth";
 
@@ -21,6 +20,19 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
+
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase/config";
+
+async function logout() {
+  await signOut(auth);
+
+  // bersihkan role
+  localStorage.removeItem("role");
+
+  // redirect ke landing
+  window.location.href = "/";
+}
 
 // =====================================
 // 🎓 STUDENT DASHBOARD FINAL + WAITING ROOM
