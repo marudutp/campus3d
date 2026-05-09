@@ -1,4 +1,4 @@
-// src/client/main.ts
+// src/legacy-engine/main.ts
 import { loginWithGoogle } from "./auth/AuthManager.js";
 import { createPioneerScene } from "./scene";
 import { AvatarManager } from "./managers/AvatarManager.js";
@@ -8,8 +8,7 @@ import * as BABYLON from "@babylonjs/core";
 import { WhiteboardManager } from "./managers/WhiteboardManager.js";
 import { WhiteboardUI } from "./managers/WhiteboardUI.js";
 import { User } from "firebase/auth";
-import { TEACHER_EMAILS } from '@shared/admin.config';
-// import { ROLES } from "./shared/constants";
+
 import { ROLES, NETWORK_EVENTS } from '@shared/constants';
 import "@babylonjs/loaders/glTF";
 
@@ -52,7 +51,7 @@ interface AppUser extends User {
     role: string;
 }
 
-// Server URLs - Sesuaikan dengan environment
+// Server URLs
 const MOVEMENT_SERVER_URL = import.meta.env.VITE_MOVEMENT_SERVER_URL ||
     `${window.location.protocol}//${window.location.hostname}:8080`;
 const AUDIO_SERVER_URL = import.meta.env.VITE_AUDIO_SERVER_URL ||
@@ -76,6 +75,7 @@ async function bootstrap(config: {
     console.log("🚀 Pioneer Portal V3 - Starting...");
     console.log(`📡 Movement Server: ${MOVEMENT_SERVER_URL}`);
     console.log(`🎧 Audio Server: ${AUDIO_SERVER_URL}`);
+    console.log(`👤 User from config: ${config.user.displayName} (${config.user.role})`);
 
     // 1. UI Overlay
     const overlay = document.getElementById("ui-overlay");
@@ -86,31 +86,38 @@ async function bootstrap(config: {
         }, 500);
     }
 
-    // 2. Google Authentication
-    console.log("🔐 Authenticating with Google...");
-    const googleUser = await loginWithGoogle();
-    if (!googleUser) {
-        console.error("❌ Google authentication failed");
-        return;
-    }
-    const user = googleUser as AppUser;
+    // ============================================
+    // 🔥 PERBAIKAN: Pake user dari config, BUKAN login ulang
+    // ============================================
+    const myRole = config.user.role;
+    const user = {
+        uid: config.user.uid,
+        displayName: config.user.displayName,
+        email: config.user.uid + "@temp.com",
+        role: myRole
+    } as any;
 
-    // 3. Determine Role
-    const myRole = TEACHER_EMAILS.includes(user.email || "") ? ROLES.TEACHER : ROLES.STUDENT;
-    user.role = myRole;
-    console.log(`👤 User: ${user.displayName} (${user.email}) - Role: ${myRole}`);
+    console.log(`👤 User: ${user.displayName} - Role: ${myRole}`);
 
     // 4. Initialize Babylon.js Scene & Managers
     console.log("🎮 Creating Babylon.js scene...");
     const { scene, engine, canvas } = await createPioneerScene("renderCanvas");
 
     const avatarManager = new AvatarManager(scene);
+    // 🔥 TAMBAHKAN INI
+    (window as any).avatarManager = avatarManager;
     const voiceManager = new VoiceManager(scene);
 
     // NetworkManager dengan dual server
     const networkManager = new NetworkManager(MOVEMENT_SERVER_URL, AUDIO_SERVER_URL, avatarManager);
-
+    // 🔥 TAMBAHKAN INI - Simpan ke global window untuk debugging
+    (window as any).networkManager = networkManager;
+    (window as any).movementSocket = networkManager.movementSocket;
+    
     const wbManager = new WhiteboardManager(scene, networkManager, user.role);
+    // Setelah membuat wbManager
+    (window as any).whiteboardManager = wbManager;
+    console.log("✅ WhiteboardManager saved to window");
 
     // Setup connections
     (networkManager as any).voiceManager = voiceManager;
@@ -147,7 +154,7 @@ async function bootstrap(config: {
         }, 100);
     });
 
-    // 8. Setup Input Controls (Keyboard or Mobile)
+    // 8. Setup Input Controls
     // const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0);
     // if (isMobile) {
     //     console.log("📱 Mobile mode detected - Using touch controls");
@@ -157,11 +164,18 @@ async function bootstrap(config: {
     //     setupKeyboardInput(scene, avatarManager, scene.activeCamera as BABYLON.Camera, networkManager);
     // }
 
-    // main.ts - Di dalam bootstrap, panggil seperti ini:
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0);
+    // src/legacy-engine/main.ts - Di dalam bootstrap function
+
+    // Deteksi mobile yang lebih akurat
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent);
+
+    console.log("📱 Mobile detection - UserAgent:", userAgent);
+    console.log("📱 Is mobile?", isMobile);
+
     if (isMobile) {
         console.log("📱 Mobile mode detected - Using touch controls");
-        setupMobileInput(scene, avatarManager, canvas, networkManager);  // ← Kirim networkManager, BUKAN socket
+        setupMobileInput(scene, avatarManager, canvas, networkManager);
     } else {
         console.log("⌨️ Desktop mode detected - Using keyboard controls");
         setupKeyboardInput(scene, avatarManager, scene.activeCamera as BABYLON.Camera, networkManager);
@@ -180,7 +194,7 @@ async function bootstrap(config: {
         scene.render();
     });
 
-    // 11. Audio Unlocker (Browser policy)
+    // 11. Audio Unlocker
     window.addEventListener("click", () => {
         if (BABYLON.Engine.audioEngine) {
             BABYLON.Engine.audioEngine.unlock();
@@ -199,116 +213,11 @@ async function bootstrap(config: {
 // ============================================
 // KEYBOARD INPUT HANDLER
 // ============================================
-// function setupKeyboardInput(
-//     scene: BABYLON.Scene,
-//     avatarManager: AvatarManager,
-//     camera: BABYLON.Camera,
-//     networkManager: NetworkManager
-// ) {
-//     const inputMap: Record<string, boolean> = {};
-
-//     // Register keyboard actions
-//     scene.actionManager = new BABYLON.ActionManager(scene);
-
-//     scene.actionManager.registerAction(
-//         new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, evt => {
-//             const key = evt.sourceEvent.key.toLowerCase();
-//             inputMap[key] = true;
-
-//             // Debug: log key presses
-//             if (key === 'w' || key === 's' || key === 'a' || key === 'd') {
-//                 console.log(`⌨️ Key pressed: ${key}`);
-//             }
-//         })
-//     );
-
-//     scene.actionManager.registerAction(
-//         new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, evt => {
-//             const key = evt.sourceEvent.key.toLowerCase();
-//             inputMap[key] = false;
-//         })
-//     );
-
-//     // Movement update on every frame
-//     scene.onBeforeRenderObservable.add(() => {
-//         if (!avatarManager.localAvatar) return;
-
-//         let dx = 0, dz = 0;
-//         if (inputMap["w"]) dz += 1;
-//         if (inputMap["s"]) dz -= 1;
-//         if (inputMap["a"]) dx -= 1;
-//         if (inputMap["d"]) dx += 1;
-
-//         // Handle movement (pass movement socket)
-//         avatarManager.handleAvatarMovement(dx, dz, camera, networkManager.movementSocket);
-//     });
-// }
-// src/client/main.ts
-// Update fungsi setupKeyboardInput
-
-// src/client/main.ts
-// src/client/main.ts
-// function setupKeyboardInput(// src/client/main.ts
-// src/client/main.ts
-
-// function setupKeyboardInput(
-//     scene: BABYLON.Scene,
-//     avatarManager: AvatarManager,
-//     camera: BABYLON.Camera,
-//     networkManager: NetworkManager
-// ) {
-//     const keys: Record<string, boolean> = {
-//         w: false, a: false, s: false, d: false
-//     };
-
-//     window.addEventListener('keydown', (e) => {
-//         const key = e.key.toLowerCase();
-//         if (keys.hasOwnProperty(key)) {
-//             keys[key] = true;
-//             e.preventDefault();
-//             console.log(`🔽 Key pressed: ${key}`);
-//         }
-//     });
-
-//     window.addEventListener('keyup', (e) => {
-//         const key = e.key.toLowerCase();
-//         if (keys.hasOwnProperty(key)) {
-//             keys[key] = false;
-//             console.log(`🔼 Key released: ${key}`);
-//         }
-//     });
-
-//     scene.onBeforeRenderObservable.add(() => {
-//         if (!avatarManager.localAvatar) return;
-
-//         // PERBAIKAN: Mapping yang benar
-//         // W = maju = deltaZ positif
-//         // S = mundur = deltaZ negatif
-//         // A = kiri = deltaX negatif
-//         // D = kanan = deltaX positif
-//         let dx = 0, dz = 0;
-
-//         if (keys.w) dz = 1;      // Maju
-//         if (keys.s) dz = -1;     // Mundur
-//         if (keys.a) dx = -1;     // Kiri
-//         if (keys.d) dx = 1;      // Kanan
-
-//         if (dx !== 0 || dz !== 0) {
-//             console.log(`🎮 Movement: dx=${dx}, dz=${dz}`);
-//         }
-
-//         avatarManager.handleAvatarMovement(dx, dz, camera, networkManager.movementSocket);
-//     });
-
-//     console.log("⌨️ Keyboard: W=Forward, S=Backward, A=Left, D=Right");
-// }
-// main.ts - setupKeyboardInput juga pakai networkManager
-
 function setupKeyboardInput(
     scene: BABYLON.Scene,
     avatarManager: AvatarManager,
     camera: BABYLON.Camera,
-    networkManager: NetworkManager  // ← terima NetworkManager, bukan socket
+    networkManager: NetworkManager
 ) {
     const keys: Record<string, boolean> = {
         w: false, a: false, s: false, d: false
@@ -338,11 +247,6 @@ function setupKeyboardInput(
         if (keys.a) dx = -1;
         if (keys.d) dx = 1;
 
-        if (dx !== 0 || dz !== 0) {
-            console.log(`🎮 Movement: dx=${dx}, dz=${dz}`);
-        }
-
-        // ← pakai networkManager.movementSocket
         avatarManager.handleAvatarMovement(dx, dz, camera, networkManager.movementSocket);
     });
 
@@ -350,79 +254,8 @@ function setupKeyboardInput(
 }
 
 // ============================================
-// MOBILE INPUT HANDLER (Virtual Joystick)
+// MOBILE INPUT HANDLER
 // ============================================
-// function setupMobileInput(
-//     scene: BABYLON.Scene,
-//     avatarManager: AvatarManager,
-//     canvas: HTMLCanvasElement,
-//     networkManager: NetworkManager
-// ) {
-//     // Show mobile UI
-//     const mobileUI = document.getElementById("mobile-controls");
-//     if (mobileUI) mobileUI.style.display = "flex";
-
-//     // Setup virtual joysticks
-//     BABYLON.VirtualJoystick.Canvas = canvas;
-//     const leftJoy = new BABYLON.VirtualJoystick(true);  // Movement joystick
-//     const rightJoy = new BABYLON.VirtualJoystick(false); // Rotation joystick
-
-//     scene.onBeforeRenderObservable.add(() => {
-//         if (!avatarManager.localAvatar) return;
-
-//         // Handle movement
-//         if (leftJoy.pressed) {
-//             avatarManager.handleAvatarMovement(
-//                 leftJoy.deltaPosition.x,
-//                 leftJoy.deltaPosition.y,
-//                 scene.activeCamera,
-//                 networkManager.movementSocket
-//             );
-//         }
-
-//         // Handle rotation
-//         if (rightJoy.pressed) {
-//             avatarManager.localAvatar.rotation.y += rightJoy.deltaPosition.x * 0.05;
-//         }
-//     });
-// }
-
-
-// function setupMobileInput(
-//     scene: BABYLON.Scene,
-//     avatarManager: AvatarManager,
-//     canvas: HTMLCanvasElement,
-//     networkManager: NetworkManager
-// ) {
-//     const mobileUI = document.getElementById("mobile-controls");
-//     if (mobileUI) mobileUI.style.display = "flex";
-
-//     // ❌ HAPUS BARIS INI!
-//     // BABYLON.VirtualJoystick.Canvas = canvas;
-
-//     const leftJoy = new BABYLON.VirtualJoystick(true);
-//     const rightJoy = new BABYLON.VirtualJoystick(false);
-
-//     scene.onBeforeRenderObservable.add(() => {
-//         if (!avatarManager.localAvatar) return;
-
-//         if (leftJoy.pressed) {
-//             avatarManager.handleAvatarMovement(
-//                 leftJoy.deltaPosition.x,
-//                 leftJoy.deltaPosition.y,
-//                 scene.activeCamera,
-//                 networkManager.movementSocket  // ✅ Tetap pakai movementSocket
-//             );
-//         }
-
-//         if (rightJoy.pressed) {
-//             avatarManager.localAvatar.rotation.y += rightJoy.deltaPosition.x * 0.05;
-//         }
-//     });
-// }
-
-// main.ts - Ganti fungsi setupMobileInput dengan ini
-
 function setupMobileInput(
     scene: BABYLON.Scene,
     avatarManager: AvatarManager,
@@ -431,47 +264,38 @@ function setupMobileInput(
 ) {
     console.log("📱 Setting up mobile joystick controls...");
 
-    // Show mobile UI
     const mobileUI = document.getElementById("mobile-controls");
     if (mobileUI) mobileUI.style.display = "flex";
 
-    // ❌ HAPUS baris ini (penyebab error clearRect)
-    // BABYLON.VirtualJoystick.Canvas = canvas;
+    const leftJoy = new BABYLON.VirtualJoystick(true);
+    const rightJoy = new BABYLON.VirtualJoystick(false);
 
-    // Setup virtual joysticks
-    const leftJoy = new BABYLON.VirtualJoystick(true);   // Movement joystick
-    const rightJoy = new BABYLON.VirtualJoystick(false); // Rotation joystick
-
-    // Simpan ke window untuk debugging
     (window as any).leftJoy = leftJoy;
     (window as any).rightJoy = rightJoy;
 
     scene.onBeforeRenderObservable.add(() => {
         if (!avatarManager.localAvatar) return;
 
-        // Handle movement - pakai movementSocket dari NetworkManager
         if (leftJoy.pressed) {
             avatarManager.handleAvatarMovement(
                 leftJoy.deltaPosition.x,
                 leftJoy.deltaPosition.y,
-                scene.activeCamera,           // ← camera di sini, pastikan tidak null
-                networkManager.movementSocket // ← pakai movementSocket
+                scene.activeCamera,
+                networkManager.movementSocket
             );
         }
 
-        // Handle rotation
         if (rightJoy.pressed) {
             avatarManager.localAvatar.rotation.y += rightJoy.deltaPosition.x * 0.05;
         }
     });
 
-    console.log("✅ Mobile joystick ready - Movement socket connected:", !!networkManager.movementSocket);
+    console.log("✅ Mobile joystick ready");
 }
 
 // ============================================
 // EXPORT FOR DEBUGGING
 // ============================================
-// Make managers available in console for debugging
 if (typeof window !== 'undefined') {
     (window as any).debug = {
         version: '3.0.0',
@@ -479,6 +303,3 @@ if (typeof window !== 'undefined') {
         audioServer: AUDIO_SERVER_URL
     };
 }
-
-// Start the application
-// window.addEventListener("DOMContentLoaded", bootstrap);

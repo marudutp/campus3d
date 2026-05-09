@@ -1,8 +1,8 @@
 // G:\project2025\babylonjs\virtual-classroom-v3\shared\constants.ts
 
 export const ROLES = {
-    TEACHER: "guru",
-    STUDENT: "siswa"
+    TEACHER: "teacher",
+    STUDENT: "student"
 };
 
 export const NETWORK_EVENTS = {

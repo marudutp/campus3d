@@ -1,0 +1,26 @@
+==== SAME NAME FILES ==== 
+FILE    : main.ts 
+LEGACY  : G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\main.ts 
+FOUND   : G:\Temporary\html\campus3d-landing-page\campus3d\src\main.ts 
+ 
+FILE    : WhiteboardUI.ts 
+LEGACY  : G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardUI.ts 
+FOUND   : G:\Temporary\html\campus3d-landing-page\campus3d\src\ui\WhiteboardUI.ts 
+ 
+FILE    : Controls.ts 
+LEGACY  : G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\ui\Controls.ts 
+FOUND   : G:\Temporary\html\campus3d-landing-page\campus3d\src\ui\Controls.ts 
+ 
+FILE    : MainMenu.ts 
+LEGACY  : G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\ui\MainMenu.ts 
+FOUND   : G:\Temporary\html\campus3d-landing-page\campus3d\src\ui\MainMenu.ts 
+ 
+FILE    : NameTag.ts 
+LEGACY  : G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\ui\NameTag.ts 
+FOUND   : G:\Temporary\html\campus3d-landing-page\campus3d\src\ui\NameTag.ts 
+ 
+FILE    : WhiteboardUI.ts 
+LEGACY  : G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\ui\WhiteboardUI.ts 
+FOUND   : G:\Temporary\html\campus3d-landing-page\campus3d\src\ui\WhiteboardUI.ts 
+ 
+DONE 

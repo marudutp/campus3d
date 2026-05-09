@@ -1,0 +1,71 @@
+==== SUSPICIOUS FILES ==== 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\210426landing copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\210426landing copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\210426main copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\210426main copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\landing.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\main.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\seeder.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\firebase\auth.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\firebase\config.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\main copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\main copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\main.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\scene.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\auth\AuthManager.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\entities\LocalPlayer.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\entities\Player.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\entities\RemotePlayer.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\entities\Whiteboard.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\AvatarManager.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\Orig-AvatarManager.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\VoiceManager copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\VoiceManager copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\VoiceManager.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardManager copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardManager copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardManager.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardManagerUntukBackup.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardManagerUntukBackup.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardUI copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardUI copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardUI.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardUIUntukBackup.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\managers\WhiteboardUIUntukBackup.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\network\NetworkManager.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\network\NetworkManagerUntukBackup.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\network\NetworkManagerUntukBackup.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\network\orig-NetworkManager.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\network\PeerVoice.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\ui\Controls.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\ui\MainMenu.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\ui\NameTag.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\ui\WhiteboardUI.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\utils\AnimationHelper.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\utils\AssetLoader.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\voice\AudioSystem.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\voice\PeerVoice.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\voice\VoiceManager copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\voice\VoiceManager copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\legacy-engine\voice\VoiceManager.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\modules\class.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\modules\waitingRoom.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\210426studentDashboard copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\210426studentDashboard copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\210426teacherDashboard copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\210426teacherDashboard copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\classroom copy 2.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\classroom copy 2.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\classroom copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\classroom copy.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\classroom.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\studentDashboard.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\teacherDashboard.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\pages\waitingRoom.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\types\index.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\ui\Controls.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\ui\MainMenu.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\ui\NameTag.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\ui\WhiteboardUI.ts 
+G:\Temporary\html\campus3d-landing-page\campus3d\src\utils\format.ts 
+DONE 

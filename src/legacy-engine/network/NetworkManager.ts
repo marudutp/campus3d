@@ -1,4 +1,3 @@
-// src/client/network/NetworkManager.ts
 import { io, Socket } from "socket.io-client";
 import { NETWORK_EVENTS, ROLES } from "@shared/constants";
 import { AvatarManager } from "../managers/AvatarManager.js";
@@ -130,6 +129,7 @@ export class NetworkManager {
     }
 
     public sendDrawData(data: any) {
+        console.log("🔍 sendDrawData: emitting 'drawData'", data);
         if (this.movementSocket && this.movementSocket.connected) {
             this.movementSocket.emit("drawData", data);
         }
@@ -212,6 +212,7 @@ export class NetworkManager {
         });
 
         this.movementSocket.on("remoteDraw", (data: any) => {
+             console.log("📥 Received remoteDraw:", data); // ← TAMBAHKAN LOG
             if (this.whiteboardManager) {
                 this.whiteboardManager.drawLocally(
                     data.x1, data.y1,

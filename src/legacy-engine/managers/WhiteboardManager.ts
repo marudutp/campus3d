@@ -25,7 +25,8 @@ export class WhiteboardManager {
         this.role = role;
 
         console.log("📝 Initializing WhiteboardManager...");
-
+        console.log("🔍 WHITEBOARD MANAGER - Role received:", role);  // ← TAMBAHKAN INI
+        console.log("🔍 WHITEBOARD MANAGER - Is Teacher?", role === ROLES.TEACHER);  // ← TAMBAHKAN INI
         // 1. Buat whiteboard mesh (box tipis)
         this.mesh = BABYLON.MeshBuilder.CreateBox("whiteboard", {
             width: 16,
@@ -134,7 +135,8 @@ export class WhiteboardManager {
                         });
                     }
                 }
-
+                // 🔥 TAMBAHKAN LOG UNTUK DEBUG
+                console.log("📤 Sending draw data:", { x1: this.lastX, y1: this.lastY, x2: currentX, y2: currentY });
                 this.lastX = currentX;
                 this.lastY = currentY;
             }

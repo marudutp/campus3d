@@ -7,32 +7,21 @@ import { io } from "socket.io-client";
 import { Vector3, Mesh, MeshBuilder } from "@babylonjs/core";
 import { VoiceManager } from "../legacy-engine/voice/VoiceManager";
 import { updateDoc, deleteField } from "firebase/firestore";
-
+import { startEngine } from "../legacy-engine/main.js"; // ✅ Perbaiki path ke legacy-engine
 // optional nanti:
 /// import { NetworkManager } from "../network/NetworkManager";
 
 export async function loadClassroom() {
-  const app =
-    document.getElementById("app")!;
-
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
-
-  const classId =
-    params.get("classId");
+  const app = document.getElementById("app")!;
+  const params = new URLSearchParams(window.location.search);
+  const classId = params.get("classId");
 
   if (!classId) {
-    app.innerHTML =
-      errorBox(
-        "Class ID tidak ditemukan"
-      );
+    app.innerHTML = errorBox("Class ID tidak ditemukan");
     return;
   }
 
   const user = currentUser;
-
   if (!user) {
     window.location.href = "/";
     return;
@@ -41,12 +30,7 @@ export async function loadClassroom() {
   // ====================================
   // CEK SESSION LIVE
   // ====================================
-  const sessionRef =
-    doc(
-      db,
-      "sessions",
-      classId
-    );
+  const sessionRef = doc(db, "sessions", classId);
 
   await setDoc(
     sessionRef,
@@ -66,143 +50,91 @@ export async function loadClassroom() {
     [`participants.${user.uid}`]: deleteField()
   });
 
-  const sessionSnap =
-    await getDoc(
-      sessionRef
-    );
+  const sessionSnap = await getDoc(sessionRef);
 
-  if (
-    !sessionSnap.exists()
-  ) {
-    window.location.href =
-      `/waiting-room.html?classId=${classId}`;
+  if (!sessionSnap.exists()) {
+    window.location.href = `/waiting-room.html?classId=${classId}`;
     return;
   }
 
-  const session: any =
-    sessionSnap.data();
+  const session: any = sessionSnap.data();
 
-  if (
-    session.status !==
-    "live"
-  ) {
-    window.location.href =
-      `/waiting-room.html?classId=${classId}`;
+  if (session.status !== "live") {
+    window.location.href = `/waiting-room.html?classId=${classId}`;
     return;
   }
-
-
-
-
 
   // ====================================
   // UI SHELL
   // ====================================
   app.innerHTML = `
     <div class="w-screen h-screen relative bg-black">
-
-      <canvas
-        id="renderCanvas"
-        class="w-full h-full touch-none"
-      ></canvas>
-
+      <canvas id="renderCanvas" class="w-full h-full touch-none"></canvas>
       <div class="absolute top-4 left-4 bg-black/50 text-white px-4 py-2 rounded-xl text-sm">
         🎓 Class: ${classId}
       </div>
-
       <div class="absolute top-4 right-4 flex gap-2">
-
-        <button
-          id="leaveBtn"
-          class="bg-red-500 px-4 py-2 rounded-lg text-white"
-        >
+        <button id="leaveBtn" class="bg-red-500 px-4 py-2 rounded-lg text-white">
           Leave
         </button>
-
       </div>
-
-      <div
-        id="loadingText"
-        class="absolute inset-0 flex items-center justify-center text-white text-xl bg-black z-10"
-      >
+      <div id="loadingText" class="absolute inset-0 flex items-center justify-center text-white text-xl bg-black z-10">
         Loading Classroom...
       </div>
-
     </div>
   `;
 
   // ====================================
-  // LOAD BABYLON SCENE
+  // 🔥 PAKAI startEngine TAPI TETAP GUNAKAN user DARI currentUser
   // ====================================
   try {
-    const result =
-      await createPioneerScene(
-        "renderCanvas"
-      );
+    const role = localStorage.getItem("role") || "student";
+    
+    console.log("🎮 Starting engine with user:", user.uid, role);
+    
+    await startEngine({
+      sessionId: classId,
+      user: {
+        uid: user.uid,                    // ✅ user dari currentUser
+        displayName: user.displayName || "User",
+        role: role
+      }
+    });
 
-    console.log(
-      "✅ Scene Ready:",
-      result
-    );
+    console.log("✅ Engine started - Avatar should appear");
 
-
-    // ====================================
-    // 🎧 AUDIO INIT (FIXED)
-    // ====================================
-
-    // ====================================
-    // 🎧 AUDIO INIT (FIXED)
-    // ====================================
-    const voice = new VoiceManager(result.scene);
-
-    await voice.init(
-      classId as string,
-      user!.uid,
-      "https://localhost:8081"
-    );
-    console.log("🎧 Voice initialized");
-
-    // simpan biar bisa dipakai tombol mute dll
-    (window as any).voice = voice;
-
-
-
-    initMovement(
-      result.scene,
-      classId,
-      user!
-    );
-    // future:
-    // initMovement(result.scene, classId, user);
-    // initVoice(classId, user);
-
-    const loading =
-      document.getElementById(
-        "loadingText"
-      );
-
-    if (loading)
-      loading.remove();
+    const loading = document.getElementById("loadingText");
+    if (loading) loading.remove();
 
   } catch (err) {
-    console.error(err);
-
-    app.innerHTML =
-      errorBox(
-        "Gagal memuat classroom"
-      );
+    console.error("❌ startEngine error:", err);
+    app.innerHTML = errorBox("Gagal memuat classroom: " + (err instanceof Error ? err.message : String(err)));
   }
 
   // ====================================
   // LEAVE BUTTON
   // ====================================
-  document.getElementById(
-    "leaveBtn"
-  )!.onclick = () => {
-    window.location.href =
-      `/dashboard.html`;
-  };
+  const leaveBtn = document.getElementById("leaveBtn");
+  if (leaveBtn) {
+    leaveBtn.onclick = () => {
+      window.location.href = "/dashboard.html";
+    };
+  }
 }
+
+// function errorBox(text: string) {
+//   return `
+//     <div class="min-h-screen bg-[#020617] text-white flex items-center justify-center">
+//       <div class="text-center">
+//         <p class="text-red-400 text-xl mb-4">❌ Error</p>
+//         <p>${text}</p>
+//         <button onclick="window.location.href='/dashboard.html'" class="mt-4 bg-[#00CED1] text-black px-4 py-2 rounded-lg">
+//           Back to Dashboard
+//         </button>
+//       </div>
+//     </div>
+//   `;
+// }
 
 // ====================================
 // HELPER
