@@ -146,7 +146,8 @@ export class VoiceManager {
                 spatialSound: true,
                 maxDistance: AUDIO_CONFIG.MAX_DISTANCE,
                 refDistance: AUDIO_CONFIG.REF_DISTANCE,
-                rolloffFactor: AUDIO_CONFIG.ROLLOFF_FACTOR,
+                // rolloffFactor: AUDIO_CONFIG.ROLLOFF_FACTOR,
+                rolloffFactor: AUDIO_CONFIG.ROLLOFF,
                 distanceModel: "exponential"
             }
         );
