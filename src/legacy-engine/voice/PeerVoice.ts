@@ -157,7 +157,7 @@
 //     }
 // }
 
-import { NetworkManager } from "./NetworkManager";
+import { NetworkManager } from "../network/NetworkManager";
 
 export class PeerVoice {
     public peerConnection: RTCPeerConnection;
