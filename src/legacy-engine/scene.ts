@@ -89,8 +89,8 @@ export async function createPioneerScene(canvasId: string) {
         throw new Error("Canvas tidak ditemukan");
     }
 
-    const canvas =
-        canvasElement as HTMLCanvasElement;
+    const canvas = canvasElement as unknown as HTMLCanvasElement;
+        // canvasElement as HTMLCanvasElement;
 
     if (!canvas) {
         throw new Error(`Canvas dengan id ${canvasId} tidak ditemukan!`);
