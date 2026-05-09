@@ -81,7 +81,17 @@ async function loadEnvironment(scene: Scene) {
 export async function createPioneerScene(canvasId: string) {
     //debug
 
-    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+    // const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+    const canvasElement =
+        document.getElementById("renderCanvas");
+
+    if (!canvasElement) {
+        throw new Error("Canvas tidak ditemukan");
+    }
+
+    const canvas =
+        canvasElement as HTMLCanvasElement;
+
     if (!canvas) {
         throw new Error(`Canvas dengan id ${canvasId} tidak ditemukan!`);
     }
