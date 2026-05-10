@@ -28,6 +28,7 @@ export function initWaitingRoom() {
     params.get("classId");
 
   console.log(classId);
+   loadWaitingRoom();
 }
 
 export async function loadWaitingRoom() {
