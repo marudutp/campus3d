@@ -60,7 +60,9 @@ export async function loadClassroom() {
   const session: any = sessionSnap.data();
 
   if (session.status !== "live") {
-    window.location.href = `/waiting-room.html?classId=${classId}`;
+    // window.location.href = `/waiting-room.html?classId=${classId}`;
+    window.location.href =
+      `/waiting-room?classId=${classId}`;
     return;
   }
 

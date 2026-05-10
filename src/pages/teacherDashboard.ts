@@ -516,8 +516,10 @@ export async function loadTeacherDashboard(
               userId
             );
 
+            // window.location.href =
+            //   `/waiting-room.html?classId=${cls.id}`;
             window.location.href =
-              `/waiting-room.html?classId=${cls.id}`;
+              `/waiting-room?classId=${cls.id}`;
           };
 
         // ===============================

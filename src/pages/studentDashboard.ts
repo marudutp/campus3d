@@ -113,8 +113,8 @@ export async function loadStudentDashboard(
 
             <p class="text-2xl font-bold text-green-400">
               ${formatRupiah(
-                rewardAmount
-              )}
+    rewardAmount
+  )}
             </p>
           </div>
 
@@ -206,9 +206,9 @@ export async function loadStudentDashboard(
 
     window.open(
       "https://wa.me/?text=" +
-        encodeURIComponent(
-          text
-        ),
+      encodeURIComponent(
+        text
+      ),
       "_blank"
     );
   };
@@ -218,9 +218,9 @@ export async function loadStudentDashboard(
   )!.onclick = () => {
     window.open(
       "https://t.me/share/url?url=" +
-        encodeURIComponent(
-          referralLink
-        ),
+      encodeURIComponent(
+        referralLink
+      ),
       "_blank"
     );
   };
@@ -349,22 +349,20 @@ export async function loadStudentDashboard(
         </h3>
 
         <p class="text-sm text-gray-400 mb-1">
-          👨‍🏫 ${
-            cls.instructorName ||
-            "Pengajar"
-          }
+          👨‍🏫 ${cls.instructorName ||
+        "Pengajar"
+        }
         </p>
 
-        ${
-          cls.date
-            ? `
+        ${cls.date
+          ? `
             <p class="text-yellow-400 text-sm mb-2">
               📅 ${formatDate(
-                cls.date
-              )}
+            cls.date
+          )}
             </p>
           `
-            : ""
+          : ""
         }
 
         <p class="text-gray-400 mb-4">
@@ -373,20 +371,19 @@ export async function loadStudentDashboard(
 
         <p class="text-[#00CED1] font-semibold mb-4">
           ${formatRupiah(
-            cls.price
-          )}
+          cls.price
+        )}
         </p>
 
-        ${
-          isJoined
-            ? `
+        ${isJoined
+          ? `
             <button
               class="enterWaitingBtn bg-green-500 text-white px-4 py-2 rounded-lg w-full font-semibold"
             >
               🚪 Masuk Waiting Room
             </button>
           `
-            : `
+          : `
             <button
               class="joinBtn bg-[#00CED1] text-black px-4 py-2 rounded-lg w-full font-semibold"
             >
@@ -420,8 +417,10 @@ export async function loadStudentDashboard(
               "Berhasil join kelas 🎉"
             );
 
+            // window.location.href =
+            //   `/waiting-room.html?classId=${cls.id}`;
             window.location.href =
-              `/waiting-room.html?classId=${cls.id}`;
+              `/waiting-room?classId=${cls.id}`;
           };
       }
 
@@ -489,7 +488,7 @@ async function startPayment(
     if (!data.success) {
       alert(
         data.error ||
-          "Pembayaran gagal ❌"
+        "Pembayaran gagal ❌"
       );
 
       return false;
