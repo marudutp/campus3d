@@ -451,6 +451,9 @@ export async function loadStudentDashboard(
 // =====================================
 // PAYMENT
 // =====================================
+const VITE_BANK_SERVER_URL =
+  import.meta.env.VITE_API_URL;
+
 async function startPayment(
   cls: any,
   userId: string
@@ -458,7 +461,7 @@ async function startPayment(
   try {
     const res =
       await fetch(
-        "http://localhost:3001/pay",
+        "${VITE_BANK_SERVER_URL}/pay",
         {
           method:
             "POST",

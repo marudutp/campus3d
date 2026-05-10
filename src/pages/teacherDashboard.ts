@@ -59,8 +59,8 @@ export async function loadTeacherDashboard(
   async function getBalance() {
     const res =
       await fetch(
-        "http://localhost:3001/balance/" +
-          userId
+        "${VITE_BANK_SERVER_URL}/balance/" +
+        userId
       );
 
     const data =
@@ -294,8 +294,8 @@ export async function loadTeacherDashboard(
 
           <p class="text-[#00CED1] font-semibold mb-1">
             ${formatRupiah(
-              cls.price
-            )}
+          cls.price
+        )}
           </p>
 
           <p class="text-sm text-gray-400 mb-1">
@@ -305,9 +305,9 @@ export async function loadTeacherDashboard(
           <p class="text-sm text-gray-400 mb-4">
             Potensi omzet:
             ${formatRupiah(
-              studentCount *
-                cls.price
-            )}
+          studentCount *
+          cls.price
+        )}
           </p>
 
           <div class="grid grid-cols-2 gap-2 mb-3">
@@ -350,7 +350,8 @@ export async function loadTeacherDashboard(
 
           </div>
         `;
-
+        const VITE_BANK_SERVER_URL =
+          import.meta.env.VITE_API_URL;
         // ===============================
         // ELEMENTS
         // ===============================
@@ -450,15 +451,15 @@ export async function loadTeacherDashboard(
                 ?.length > 0
             ) {
               await fetch(
-                "http://localhost:3001/refund",
+                "${VITE_BANK_SERVER_URL}/refund",
                 {
                   method:
                     "POST",
                   headers:
-                    {
-                      "Content-Type":
-                        "application/json"
-                    },
+                  {
+                    "Content-Type":
+                      "application/json"
+                  },
                   body:
                     JSON.stringify(
                       {
@@ -556,9 +557,9 @@ export async function loadTeacherDashboard(
 
             window.open(
               "https://wa.me/?text=" +
-                encodeURIComponent(
-                  text
-                ),
+              encodeURIComponent(
+                text
+              ),
               "_blank"
             );
           };
@@ -567,9 +568,9 @@ export async function loadTeacherDashboard(
           () => {
             window.open(
               "https://www.facebook.com/sharer/sharer.php?u=" +
-                encodeURIComponent(
-                  shareLink
-                ),
+              encodeURIComponent(
+                shareLink
+              ),
               "_blank"
             );
           };
@@ -578,9 +579,9 @@ export async function loadTeacherDashboard(
           () => {
             window.open(
               "https://www.linkedin.com/sharing/share-offsite/?url=" +
-                encodeURIComponent(
-                  shareLink
-                ),
+              encodeURIComponent(
+                shareLink
+              ),
               "_blank"
             );
           };

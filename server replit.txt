@@ -1,0 +1,9 @@
+bank server replit
+
+https://a7ebaad9-c561-44dc-856f-1d3ac470f4cf-00-q2g9bpcnu210.pike.replit.dev/
+
+
+VITE_MOVEMENT_SERVER_URL=https://e50bb48a-8361-4f0d-9e27-b1847c3f2e73-00-296y2fxazkbcy.pike.replit.dev/
+
+
+VITE_AUDIO_SERVER_URL=https://592245df-2802-4689-bb5e-c8efb6db0d73-00-2r8jldton76va.pike.replit.dev:8080/
