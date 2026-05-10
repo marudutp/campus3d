@@ -15,7 +15,19 @@ import { currentUser } from "../firebase/auth";
 
 
 export function initWaitingRoom() {
-  console.log("waiting room");
+  console.log(
+    "waiting room loaded"
+  );
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const classId =
+    params.get("classId");
+
+  console.log(classId);
 }
 
 export async function loadWaitingRoom() {
