@@ -13,6 +13,11 @@ import { currentUser } from "../firebase/auth";
 // /waiting-room.html?classId=abc123
 // ========================================
 
+
+export function initWaitingRoom() {
+  console.log("waiting room");
+}
+
 export async function loadWaitingRoom() {
 
 

@@ -85,8 +85,10 @@ function handleClassClick(cls: any) {
 
   // Jika user sudah pilih role
   if (role && isLoggedIn) {
+    // window.location.href =
+    //   `/waiting-room.html?classId=${cls.id}`;
     window.location.href =
-      `/waiting-room.html?classId=${cls.id}`;
+      `/waiting-room?classId=${cls.id}`;
     return;
   }
 
@@ -174,22 +176,21 @@ export async function loadLandingClasses() {
         "glass-card p-5 rounded-2xl hover:scale-[1.02] transition cursor-pointer";
 
       div.innerHTML = `
-        ${
-          cls.teaserUrl &&
+        ${cls.teaserUrl &&
           isYoutubeUrl(
             cls.teaserUrl
           )
-            ? `
+          ? `
             <iframe
               src="${getEmbedUrl(
-                cls.teaserUrl
-              )}"
+            cls.teaserUrl
+          )}"
               class="w-full h-40 mb-4 rounded-xl"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowfullscreen>
             </iframe>
           `
-            : `
+          : `
             <div class="w-full h-40 mb-4 rounded-xl bg-gray-800 flex items-center justify-center text-gray-500">
               🎥 Teaser segera hadir
             </div>
@@ -201,49 +202,45 @@ export async function loadLandingClasses() {
         </h3>
 
         <p class="text-sm text-gray-400 mb-1">
-          👨‍🏫 ${
-            cls.instructorName ||
-            "Pengajar"
-          }
+          👨‍🏫 ${cls.instructorName ||
+        "Pengajar"
+        }
         </p>
 
-        ${
-          cls.date
-            ? `
+        ${cls.date
+          ? `
             <p class="text-yellow-400 text-sm mb-2">
               📅 ${new Date(
-                cls.date
-              ).toLocaleDateString(
-                "id-ID"
-              )}
+            cls.date
+          ).toLocaleDateString(
+            "id-ID"
+          )}
             </p>
           `
-            : ""
+          : ""
         }
 
-        ${
-          cls.mission
-            ? `
+        ${cls.mission
+          ? `
             <p class="text-gray-400 text-sm mb-3 line-clamp-2">
               ${cls.mission}
             </p>
           `
-            : ""
+          : ""
         }
 
         <div class="flex justify-between items-center mt-2">
 
           <p class="text-[#00CED1] font-semibold">
             ${formatRupiah(
-              cls.price
-            )}
+          cls.price
+        )}
           </p>
 
           <span class="text-xs text-green-400">
-            👥 ${
-              cls.students
-                ?.length || 0
-            } siswa
+            👥 ${cls.students
+          ?.length || 0
+        } siswa
           </span>
 
         </div>

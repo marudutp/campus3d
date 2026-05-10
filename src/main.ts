@@ -4,6 +4,7 @@ import { auth } from "./firebase/config";
 import { loadStudentDashboard } from "./pages/studentDashboard";
 import { loadTeacherDashboard } from "./pages/teacherDashboard";
 import { loadWaitingRoom } from "./pages/waitingRoom";
+import { initWaitingRoom } from "./pages/waitingRoom";
 import { loadClassroom } from "./pages/classroom";
 
 import {
@@ -39,7 +40,15 @@ async function boot() {
     );
   }
 
-  initLanding();
+  const path =
+    window.location.pathname;
+
+  if (path === "/waiting-room") {
+    initWaitingRoom();
+  } else {
+    initLanding();
+  }
+  // initLanding();
 }
 
 boot();
