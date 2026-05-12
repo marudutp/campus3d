@@ -458,9 +458,13 @@ async function startPayment(
   userId: string
 ): Promise<boolean> {
   try {
+    console.log(
+      "🔥 FINAL BANK URL =",
+      `${VITE_BANK_SERVER_URL}/pay`
+    );
     const res =
       await fetch(
-        '${VITE_BANK_SERVER_URL}/pay',
+        `${VITE_BANK_SERVER_URL}/pay`,
         {
           method:
             "POST",
