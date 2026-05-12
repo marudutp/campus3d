@@ -450,8 +450,10 @@ export async function loadStudentDashboard(
 // =====================================
 // PAYMENT
 // =====================================
+// const VITE_BANK_SERVER_URL =
+//   import.meta.env.VITE_API_URL;
 const VITE_BANK_SERVER_URL =
-  import.meta.env.VITE_API_URL;
+  "https://a7ebaad9-c561-44dc-856f-1d3ac470f4cf-00-q2g9bpcnu210.pike.replit.dev";
 
 async function startPayment(
   cls: any,
