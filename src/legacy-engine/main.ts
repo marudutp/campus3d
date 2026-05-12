@@ -51,11 +51,18 @@ interface AppUser extends User {
     role: string;
 }
 
-// Server URLs
-const MOVEMENT_SERVER_URL = import.meta.env.VITE_MOVEMENT_SERVER_URL ||
-    `${window.location.protocol}//${window.location.hostname}:8080`;
-const AUDIO_SERVER_URL = import.meta.env.VITE_AUDIO_SERVER_URL ||
-    `${window.location.protocol}//${window.location.hostname}:8081`;
+// Server URLs dan localhost
+// const MOVEMENT_SERVER_URL = import.meta.env.VITE_MOVEMENT_SERVER_URL ||
+//     `${window.location.protocol}//${window.location.hostname}:8080`;
+// const AUDIO_SERVER_URL = import.meta.env.VITE_AUDIO_SERVER_URL ||
+//     `${window.location.protocol}//${window.location.hostname}:8081`;
+
+const MOVEMENT_SERVER_URL =
+  "https://1afea8ad-162f-4618-911d-a6c3182136eb-00-2vhud3fqxj7rx.pike.replit.dev";
+
+const AUDIO_SERVER_URL =
+  "https://a6ff6328-ac1a-434c-8648-5f94b4ecd722-00-3l2kandciggi2.sisko.replit.dev";
+
 
 let isStarted = false;
 

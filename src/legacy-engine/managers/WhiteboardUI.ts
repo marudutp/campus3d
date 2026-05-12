@@ -73,7 +73,13 @@ export class WhiteboardUI {
                 try {
                     // const baseUrl = import.meta.env.VITE_MOVEMENT_SERVER_URL?.replace(/\/$/, "");
                     // const uploadUrl = `${baseUrl}/upload-material`;
-                    const movementUrl = import.meta.env.VITE_MOVEMENT_SERVER_URL || "https://localhost:8080";
+                    // const movementUrl = import.meta.env.VITE_MOVEMENT_SERVER_URL || "https://localhost:8080";
+
+                    const movementUrl =
+                        "https://1afea8ad-162f-4618-911d-a6c3182136eb-00-2vhud3fqxj7rx.pike.replit.dev";
+
+
+
                     const uploadUrl = `${movementUrl}/upload-material`;
 
                     // console.log("🚀 Upload URL:", uploadUrl); // ← TAMBAHKAN
