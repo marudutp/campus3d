@@ -460,7 +460,7 @@ async function startPayment(
   try {
     const res =
       await fetch(
-        "${VITE_BANK_SERVER_URL}/pay",
+        '${VITE_BANK_SERVER_URL}/pay',
         {
           method:
             "POST",

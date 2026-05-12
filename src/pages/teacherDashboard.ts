@@ -56,10 +56,12 @@ export async function loadTeacherDashboard(
   // =====================================
   // BALANCE
   // =====================================
+  const VITE_BANK_SERVER_URL =
+  import.meta.env.VITE_API_URL;
   async function getBalance() {
     const res =
       await fetch(
-        "${VITE_BANK_SERVER_URL}/balance/" +
+        `${VITE_BANK_SERVER_URL}/balance/` +
         userId
       );
 
@@ -257,7 +259,10 @@ export async function loadTeacherDashboard(
   // =====================================
   const classes =
     await getClasses();
-
+  console.log("=== TEACHER DASHBOARD DEBUG ===");
+  console.log("1. userId:", userId);
+  console.log("2. Total classes from Firestore:", classes.length);
+  console.log("3. Sample class (first):", classes[0]);
   const container =
     document.getElementById(
       "myClasses"
@@ -451,7 +456,7 @@ export async function loadTeacherDashboard(
                 ?.length > 0
             ) {
               await fetch(
-                "${VITE_BANK_SERVER_URL}/refund",
+                `${VITE_BANK_SERVER_URL}/refund`,
                 {
                   method:
                     "POST",

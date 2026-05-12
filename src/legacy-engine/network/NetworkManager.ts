@@ -70,14 +70,16 @@ export class NetworkManager {
         console.log("📡 NetworkManager connected to Whiteboard");
     }
 
-    public joinClass(uid: string, displayName: string, role: string) {
+    // public joinClass(uid: string, displayName: string, role: string) {
+    public joinClass(uid: string, displayName: string, role: string, classId: string) {
         this.localUid = uid;
         this.role = role;
         
         console.log(`📡 Joining class as ${displayName} (${role})`);
         
         // Join movement server
-        this.movementSocket.emit(NETWORK_EVENTS.AUTH_JOIN, { uid, displayName, role });
+        // this.movementSocket.emit(NETWORK_EVENTS.AUTH_JOIN, { uid, displayName, role });
+           this.movementSocket.emit(NETWORK_EVENTS.AUTH_JOIN, { uid, displayName, role, classId });
         
         // Register ke audio server
         this.audioSocket.emit('register_audio', { 

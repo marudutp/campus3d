@@ -4,3 +4,5 @@ build/
 .cache/
 .env
 *.log
+.vercel
+.env*.local

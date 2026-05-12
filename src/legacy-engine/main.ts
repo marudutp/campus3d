@@ -133,7 +133,8 @@ async function bootstrap(config: {
 
     // 6. Join Class (Connect to both servers)
     console.log("📡 Joining class...");
-    networkManager.joinClass(user.uid, user.displayName || "User", myRole);
+    // networkManager.joinClass(user.uid, user.displayName || "User", myRole);
+    networkManager.joinClass(user.uid, user.displayName, myRole, config.sessionId);
 
     // 7. Create Local Avatar
     console.log("🎨 Creating local avatar...");

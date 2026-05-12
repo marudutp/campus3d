@@ -1,8 +1,20 @@
 {
   "rewrites": [
     {
+      "source": "/classroom",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/classroom.html",
+      "destination": "/index.html"
+    },
+    {
       "source": "/waiting-room",
-      "destination": "/"
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
