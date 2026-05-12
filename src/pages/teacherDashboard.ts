@@ -56,8 +56,11 @@ export async function loadTeacherDashboard(
   // =====================================
   // BALANCE
   // =====================================
-  const VITE_BANK_SERVER_URL =
-  import.meta.env.VITE_API_URL;
+  // const VITE_BANK_SERVER_URL =
+  // import.meta.env.VITE_API_URL;
+
+  const VITE_BANK_SERVER_URL ="https://a7ebaad9-c561-44dc-856f-1d3ac470f4cf-00-q2g9bpcnu210.pike.replit.dev";
+
   async function getBalance() {
     const res =
       await fetch(
@@ -355,8 +358,7 @@ export async function loadTeacherDashboard(
 
           </div>
         `;
-        const VITE_BANK_SERVER_URL =
-          import.meta.env.VITE_API_URL;
+        const VITE_BANK_SERVER_URL ="https://a7ebaad9-c561-44dc-856f-1d3ac470f4cf-00-q2g9bpcnu210.pike.replit.dev";
         // ===============================
         // ELEMENTS
         // ===============================
