@@ -69,22 +69,61 @@ export async function loadClassroom() {
   // ====================================
   // UI SHELL
   // ====================================
+  //   app.innerHTML = `
+  //     <div class="w-screen h-screen relative bg-black">
+  //       <canvas id="renderCanvas" class="w-full h-full touch-none"></canvas>
+  //       <div class="absolute top-4 left-4 bg-black/50 text-white px-4 py-2 rounded-xl text-sm">
+  //         🎓 Class: ${classId}
+  //       </div>
+  //      <div class="absolute top-4 right-4 flex gap-2 z-50">
+  //   <button id="leaveBtn" class="bg-red-500 px-4 py-2 rounded-lg text-white">
+  //     Leave
+  //   </button>
+  // </div>
+  //       <div id="loadingText" class="absolute inset-0 flex items-center justify-center text-white text-xl bg-black z-10">
+  //         Loading Classroom...
+  //       </div>
+  //     </div>
+  //   `;
+
   app.innerHTML = `
-    <div class="w-screen h-screen relative bg-black">
-      <canvas id="renderCanvas" class="w-full h-full touch-none"></canvas>
-      <div class="absolute top-4 left-4 bg-black/50 text-white px-4 py-2 rounded-xl text-sm">
-        🎓 Class: ${classId}
-      </div>
-     <div class="absolute top-4 right-4 flex gap-2 z-50">
-  <button id="leaveBtn" class="bg-red-500 px-4 py-2 rounded-lg text-white">
-    Leave
-  </button>
-</div>
-      <div id="loadingText" class="absolute inset-0 flex items-center justify-center text-white text-xl bg-black z-10">
-        Loading Classroom...
-      </div>
+  <div class="w-screen h-screen relative overflow-hidden">
+
+    <canvas
+      id="renderCanvas"
+      class="absolute inset-0 w-full h-full touch-none"
+    ></canvas>
+
+    <div
+      class="absolute top-4 left-4 z-[1000]
+      bg-black/70 text-white px-4 py-2 rounded-xl text-sm"
+    >
+      🎓 Class: ${classId}
     </div>
-  `;
+
+    <div
+      class="absolute top-4 right-4 z-[1000] flex gap-2"
+    >
+      <button
+        id="leaveBtn"
+        class="bg-red-500 hover:bg-red-600
+        px-4 py-2 rounded-lg text-white shadow-lg"
+      >
+        Leave
+      </button>
+    </div>
+
+    <div
+      id="loadingText"
+      class="absolute inset-0 z-[999]
+      flex items-center justify-center
+      text-white text-xl bg-black"
+    >
+      Loading Classroom...
+    </div>
+
+  </div>
+`;
 
   // ====================================
   // 🔥 PAKAI startEngine TAPI TETAP GUNAKAN user DARI currentUser
