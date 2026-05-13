@@ -75,11 +75,11 @@ export async function loadClassroom() {
       <div class="absolute top-4 left-4 bg-black/50 text-white px-4 py-2 rounded-xl text-sm">
         🎓 Class: ${classId}
       </div>
-      <div class="absolute top-4 right-4 flex gap-2">
-        <button id="leaveBtn" class="bg-red-500 px-4 py-2 rounded-lg text-white">
-          Leave
-        </button>
-      </div>
+     <div class="absolute top-4 right-4 flex gap-2 z-50">
+  <button id="leaveBtn" class="bg-red-500 px-4 py-2 rounded-lg text-white">
+    Leave
+  </button>
+</div>
       <div id="loadingText" class="absolute inset-0 flex items-center justify-center text-white text-xl bg-black z-10">
         Loading Classroom...
       </div>
@@ -91,9 +91,9 @@ export async function loadClassroom() {
   // ====================================
   try {
     const role = localStorage.getItem("role") || "student";
-    
+
     console.log("🎮 Starting engine with user:", user.uid, role);
-    
+
     await startEngine({
       sessionId: classId,
       user: {
