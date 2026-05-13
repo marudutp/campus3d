@@ -16,74 +16,47 @@ import { db } from "../firebase/config";
 // sessions/{classId}
 // ======================================
 
-// interface SessionData {
-//   id?: string;
-//   classId: string;
-//   teacherId: string;
-//   status: string;
-//   onlineCount: number;
-//   participants: string[];
-//   startAt: string | null;
-//   startedAt: any;
-//   endedAt: any;
-// }
 interface SessionData {
   id?: string;
-
   classId: string;
-
-  // 🔥 tambahan metadata
-  classTitle?: string;
-
-  teacherName?: string;
-
   teacherId: string;
-
   status: string;
-
   onlineCount: number;
-
   participants: string[];
-
   startAt: string | null;
-
   startedAt: any;
-
   endedAt: any;
 }
 
-// export async function createSession(
-//   classId: string,
-//   teacherId: string,
-//   startAt?: string
-// ) {
-//   const ref = doc(
-//     db,
-//     "sessions",
-//     classId
-//   );
+// interface SessionData {
+//   id?: string;
 
-//   await setDoc(ref, {
-//     classId,
-//     teacherId,
-//     status: "waiting",
-//     onlineCount: 0,
-//     participants: [],
-//     startAt:
-//       startAt || null,
-//     startedAt: null,
-//     endedAt: null,
-//     createdAt:
-//       serverTimestamp()
-//   });
+//   classId: string;
+
+//   // 🔥 tambahan metadata
+//   classTitle?: string;
+
+//   teacherName?: string;
+
+//   teacherId: string;
+
+//   status: string;
+
+//   onlineCount: number;
+
+//   participants: string[];
+
+//   startAt: string | null;
+
+//   startedAt: any;
+
+//   endedAt: any;
 // }
 
 export async function createSession(
   classId: string,
   teacherId: string,
-  startAt?: string,
-  classTitle?: string,
-  teacherName?: string
+  startAt?: string
 ) {
   const ref = doc(
     db,
@@ -93,33 +66,62 @@ export async function createSession(
 
   await setDoc(ref, {
     classId,
-
-    // 🔥 Tambahan metadata agar classroom tampil lebih profesional
-    classTitle:
-      classTitle || "Untitled Class",
-
-    teacherName:
-      teacherName || "Pengajar",
-
     teacherId,
-
     status: "waiting",
-
     onlineCount: 0,
-
     participants: [],
-
     startAt:
       startAt || null,
-
     startedAt: null,
-
     endedAt: null,
-
     createdAt:
       serverTimestamp()
   });
 }
+
+// export async function createSession(
+//   classId: string,
+//   teacherId: string,
+//   startAt?: string,
+//   classTitle?: string,
+//   teacherName?: string
+// ) {
+//   const ref = doc(
+//     db,
+//     "sessions",
+//     classId
+//   );
+
+//   await setDoc(ref, {
+//     classId,
+
+//     // 🔥 Tambahan metadata agar classroom tampil lebih profesional
+//     classTitle:
+//       classTitle || "Untitled Class",
+
+//     teacherName:
+//       teacherName || "Pengajar",
+
+//     teacherId,
+
+//     status: "waiting",
+
+//     onlineCount: 0,
+
+//     participants: [],
+
+//     startAt:
+//       startAt || null,
+
+//     startedAt: null,
+
+//     endedAt: null,
+
+//     createdAt:
+//       serverTimestamp()
+//   });
+// }
+
 // ======================================
 // GET SESSION
 // ======================================

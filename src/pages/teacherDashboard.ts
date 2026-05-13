@@ -518,17 +518,17 @@ export async function loadTeacherDashboard(
         // ===============================
         waitingBtn.onclick =
           async () => {
-            // await createSession(
-            //   cls.id,
-            //   userId
-            // );
             await createSession(
               cls.id,
-              userId,
-              undefined,
-              cls.title,
-              currentUser?.displayName || "Pengajar"
+              userId
             );
+            // await createSession(
+            //   cls.id,
+            //   userId,
+            //   undefined,
+            //   cls.title,
+            //   currentUser?.displayName || "Pengajar"
+            // );
 
             // window.location.href =
             //   `/waiting-room.html?classId=${cls.id}`;
