@@ -1,150 +1,212 @@
-// src/main.ts
-import { initLanding, loadLandingClasses } from './landing';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase/config';
-import { startEngine } from './legacy-engine/main';
-import { initWaitingRoom } from './pages/waitingRoom';
+import { onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "./firebase/config";
 
-async function bootstrap() {
-  // CEK DULU: Apakah ini halaman khusus (waiting room atau classroom)?
-  const path = window.location.pathname;
-  const urlParams = new URLSearchParams(window.location.search);
-  const classIdFromUrl = urlParams.get('classId');
+import { loadStudentDashboard } from "./pages/studentDashboard";
+import { loadTeacherDashboard } from "./pages/teacherDashboard";
+import { loadWaitingRoom } from "./pages/waitingRoom";
+import { loadClassroom } from "./pages/classroom";
 
-  // CASE 1: Halaman WAITING ROOM
-  // if (path === '/waiting-room' && classIdFromUrl) {
-  //   console.log("🚪 Waiting room detected, classId:", classIdFromUrl);
-  //   const landingPage = document.getElementById('landing-page');
-  //   if (landingPage) landingPage.style.display = 'none';
+import {
+  initLanding,
+  loadLandingClasses
+} from "./landing";
 
-  //   // Panggil initWaitingRoom dengan parameter classId
-  //   await initWaitingRoom();
-  //   return;
-  // }
-  // CASE 1: Halaman WAITING ROOM (support dengan dan tanpa .html)
-  if ((path === '/waiting-room' || path === '/waiting-room.html') && classIdFromUrl) {
-    console.log("🚪 Waiting room detected, classId:", classIdFromUrl);
-    const landingPage = document.getElementById('landing-page');
-    if (landingPage) landingPage.style.display = 'none';
-    await initWaitingRoom(classIdFromUrl);
-    return;
+import { runSeeder } from "./seeder";
+
+// =====================================
+// 🌐 DOM ELEMENTS
+// =====================================
+const landing =
+  document.getElementById(
+    "landing-page"
+  ) as HTMLElement;
+
+const app =
+  document.getElementById(
+    "app"
+  ) as HTMLElement;
+
+// =====================================
+// 🚀 INIT APP
+// =====================================
+async function boot() {
+  try {
+    await loadLandingClasses();
+  } catch (err) {
+    console.error(
+      "❌ Gagal load landing:",
+      err
+    );
   }
 
-  // CASE 2: Halaman CLASSROOM (3D)
-  // if ((path === '/classroom' || path === '/classroom.html') && classIdFromUrl) {
-  //   console.log("🎮 Classroom detected, classId:", classIdFromUrl);
-
-  // if ((path === '/classroom' || path === '/classroom.html') && classIdFromUrl) {
-  //   console.log("🎮 Classroom detected, classId:", classIdFromUrl);
-  //   const landingPage = document.getElementById('landing-page');
-  //   if (landingPage) landingPage.style.display = 'none';
-
-  //   const userStr = localStorage.getItem('user');
-  //   const user = userStr ? JSON.parse(userStr) : null;
-  //   const role = localStorage.getItem('role') || 'student';
-
-  //   await startEngine({
-  //     sessionId: classIdFromUrl,
-  //     user: {
-  //       uid: user?.uid || `student_${Date.now()}`,
-  //       displayName: user?.displayName || 'Siswa',
-  //       role: role
-  //     }
-  //   });
-  //   return;
-  // }
-
-  // CASE 2: Halaman CLASSROOM
-  if ((path === '/classroom' || path === '/classroom.html') && classIdFromUrl) {
-    console.log("🎮 Classroom detected, classId:", classIdFromUrl);
-
-    // Sembunyikan landing page
-    const landingPage = document.getElementById('landing-page');
-    if (landingPage) landingPage.style.display = 'none';
-
-    // 🔥 PASTIKAN CANVAS ADA
-    // let canvas = document.getElementById('renderCanvas') as HTMLCanvasElement;
-    let canvas = document.getElementById('renderCanvas') as unknown as HTMLCanvasElement;
-    if (!canvas) {
-      console.log("⚠️ Canvas not found, creating...");
-      canvas = document.createElement('canvas');
-      canvas.id = 'renderCanvas';
-      canvas.style.position = 'fixed';
-      canvas.style.top = '0';
-      canvas.style.left = '0';
-      canvas.style.width = '100%';
-      canvas.style.height = '100%';
-      canvas.style.outline = 'none';
-      document.body.appendChild(canvas);
-    }
-
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    const role = localStorage.getItem('role') || 'student';
-
-    await startEngine({
-      sessionId: classIdFromUrl,
-      user: {
-        uid: user?.uid || `student_${Date.now()}`,
-        displayName: user?.displayName || 'Siswa',
-        role: role
-      }
-    });
-    return;
-  }
-
-  // CASE 3: SEMUA HALAMAN LAIN (dashboard, landing, dll)
-  console.log("🏠 Using auth flow for dashboard & landing");
-
-  // Tampilkan loading state
-  const app = document.getElementById('app');
-  if (app) {
-    app.innerHTML = `
-      <div class="min-h-screen flex items-center justify-center bg-[#020617]">
-        <div class="text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00CED1] mx-auto"></div>
-          <p class="mt-4 text-gray-400">Memuat...</p>
-        </div>
-      </div>
-    `;
-  }
-
-  // Wait for auth state
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      // User sudah login, load dashboard sesuai role
-      const role = localStorage.getItem('role') || 'student';
-      console.log(`✅ User logged in as ${role}:`, user.displayName);
-
-      // Sembunyikan landing page
-      const landingPage = document.getElementById('landing-page');
-      if (landingPage) landingPage.style.display = 'none';
-
-      if (role === 'teacher') {
-        // Panggil loadTeacherDashboard dari teacherDashboard.ts
-        const { loadTeacherDashboard } = await import('./pages/teacherDashboard');
-        await loadTeacherDashboard(user.uid);
-      } else {
-        // Panggil loadStudentDashboard dari studentDashboard.ts
-        const { loadStudentDashboard } = await import('./pages/studentDashboard');
-        await loadStudentDashboard(user.uid);
-      }
-    } else {
-      // User belum login, tampilkan landing page
-      console.log("👤 No user, showing landing page");
-
-      // Reset app container
-      if (app) app.innerHTML = '';
-
-      // Tampilkan landing page
-      const landingPage = document.getElementById('landing-page');
-      if (landingPage) landingPage.style.display = 'block';
-
-      initLanding();
-      await loadLandingClasses();
-    }
-  });
+  initLanding();
 }
 
-// Jalankan
-bootstrap();
+boot();
+
+// =====================================
+// 🧪 TEMP SEEDER
+// Jalankan di console:
+// seed()
+// =====================================
+// (window as any).seed = runSeeder;
+
+// =====================================
+// 🔐 AUTH STATE
+// SINGLE ENTRY POINT
+// =====================================
+onAuthStateChanged(
+  auth,
+  async (
+    user: User | null
+  ) => {
+    console.log(
+      "🔥 AUTH STATE:",
+      user?.uid ||
+      "guest"
+    );
+
+    // ===============================
+    // BELUM LOGIN
+    // ===============================
+    if (!user) {
+      showLanding();
+      return;
+    }
+
+    // ===============================
+    // SUDAH LOGIN
+    // ===============================
+    await onUserReady(
+      user
+    );
+  }
+);
+
+// =====================================
+// 👤 USER READY
+// =====================================
+async function onUserReady(
+  user: User
+) {
+  hideLanding();
+
+  const role =
+    localStorage.getItem(
+      "role"
+    );
+
+  console.log(
+    "🔥 ROLE:",
+    role
+  );
+
+  if (!role) {
+    console.warn(
+      "⚠️ Role belum dipilih"
+    );
+
+    showLanding();
+    return;
+  }
+
+  // =================================
+  // ROUTING CHECK
+  // =================================
+  const path =
+    window.location.pathname;
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+  const page =
+    params.get("page");
+
+  const classId =
+    params.get(
+      "classId"
+    );
+
+  // =================================
+  // WAITING ROOM
+  // contoh:
+  // /waiting-room.html?classId=abc123
+  // =================================
+  if (
+    path.includes("waiting-room") ||
+    path.includes("waitingRoom") ||
+    page === "waiting-room"
+  ) {
+    console.log(
+      "⏳ LOAD WAITING ROOM"
+    );
+
+    await loadWaitingRoom();
+    return;
+  }
+
+  // =================================
+  // CLASSROOM
+  // future route
+  // /classroom.html?classId=abc123
+  // =================================
+  if (
+    (
+      path.includes("classroom") ||
+      page === "classroom"
+    ) &&
+    classId
+  ) {
+    console.log(
+      "🎮 CLASSROOM ROUTE DETECTED:",
+      classId
+    );
+
+    await loadClassroom();
+
+    return;
+  }
+
+  // =================================
+  // DASHBOARD DEFAULT
+  // =================================
+  if (
+    role ===
+    "teacher"
+  ) {
+    console.log(
+      "🚀 LOAD TEACHER DASHBOARD"
+    );
+
+    await loadTeacherDashboard(
+      user.uid
+    );
+  } else {
+    console.log(
+      "🚀 LOAD STUDENT DASHBOARD"
+    );
+
+    await loadStudentDashboard(
+      user.uid
+    );
+  }
+}
+
+// =====================================
+// SHOW LANDING
+// =====================================
+function showLanding() {
+  landing.style.display =
+    "block";
+
+  app.innerHTML = "";
+}
+
+// =====================================
+// HIDE LANDING
+// =====================================
+function hideLanding() {
+  landing.style.display =
+    "none";
+}
