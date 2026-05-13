@@ -124,7 +124,13 @@ export async function loadClassroom() {
 
   </div>
 `;
+  console.log(
+    "🔥 CLASSROOM HTML LOADED"
+  );
 
+  console.log(
+    document.getElementById("leaveBtn")
+  );
   // ====================================
   // 🔥 PAKAI startEngine TAPI TETAP GUNAKAN user DARI currentUser
   // ====================================
