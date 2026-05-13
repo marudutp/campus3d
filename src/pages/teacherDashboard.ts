@@ -59,7 +59,7 @@ export async function loadTeacherDashboard(
   // const VITE_BANK_SERVER_URL =
   // import.meta.env.VITE_API_URL;
 
-  const VITE_BANK_SERVER_URL ="https://a7ebaad9-c561-44dc-856f-1d3ac470f4cf-00-q2g9bpcnu210.pike.replit.dev";
+  const VITE_BANK_SERVER_URL = "https://a7ebaad9-c561-44dc-856f-1d3ac470f4cf-00-q2g9bpcnu210.pike.replit.dev";
 
   async function getBalance() {
     const res =
@@ -358,7 +358,7 @@ export async function loadTeacherDashboard(
 
           </div>
         `;
-        const VITE_BANK_SERVER_URL ="https://a7ebaad9-c561-44dc-856f-1d3ac470f4cf-00-q2g9bpcnu210.pike.replit.dev";
+        const VITE_BANK_SERVER_URL = "https://a7ebaad9-c561-44dc-856f-1d3ac470f4cf-00-q2g9bpcnu210.pike.replit.dev";
         // ===============================
         // ELEMENTS
         // ===============================
@@ -518,9 +518,16 @@ export async function loadTeacherDashboard(
         // ===============================
         waitingBtn.onclick =
           async () => {
+            // await createSession(
+            //   cls.id,
+            //   userId
+            // );
             await createSession(
               cls.id,
-              userId
+              userId,
+              undefined,
+              cls.title,
+              currentUser?.displayName || "Pengajar"
             );
 
             // window.location.href =
