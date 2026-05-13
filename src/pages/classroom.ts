@@ -85,7 +85,10 @@ export async function loadClassroom() {
   //       </div>
   //     </div>
   //   `;
-
+  console.log(
+    "🔥 SESSION DATA:",
+    session
+  );
   app.innerHTML = `
   <div class="w-screen h-screen relative overflow-hidden">
 
