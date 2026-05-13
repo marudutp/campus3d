@@ -98,7 +98,10 @@ export async function loadClassroom() {
       class="absolute top-4 left-4 z-[1000]
       bg-black/70 text-white px-4 py-2 rounded-xl text-sm"
     >
-      🎓 Class: ${classId}
+      // 🎓 Class: ${classId}
+      🎓 ${session.className || "Untitled Class"}
+      <br>
+👨‍🏫      ${session.teacherName || "Unknown Teacher"}
     </div>
 
     <div
