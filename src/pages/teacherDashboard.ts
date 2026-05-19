@@ -191,7 +191,7 @@ export async function loadTeacherDashboard(
     )}`;
 
   // =====================================
-  // CREATE CLASS
+  // CREATE CLASS (DENGAN KONFIRMASI & POTONGAN 30%)
   // =====================================
   document.getElementById(
     "createBtn"
@@ -237,6 +237,29 @@ export async function loadTeacherDashboard(
       const instructorName =
         currentUser?.displayName ||
         "Pengajar";
+
+      // Validasi sederhana
+      if (!title || !price || price <= 0) {
+        alert("Harap isi nama kelas dan harga yang valid.");
+        return;
+      }
+
+      // Hitung potongan 30%
+      const potongan = price * 0.3;
+      const pendapatanBersih = price - potongan;
+
+      // Konfirmasi dengan pilihan OK (Saya Setuju) / Cancel (Batal)
+      const isConfirmed = confirm(
+        `⚠️ KONFIRMASI PEMBUATAN KELAS ⚠️\n\n` +
+        `Nama Kelas : ${title}\n` +
+        `Harga Kelas: Rp ${price.toLocaleString("id-ID")}\n\n` +
+        `💰 Potongan Platform (30%): Rp ${potongan.toLocaleString("id-ID")}\n` +
+        `✅ Pendapatan yang Anda terima: Rp ${pendapatanBersih.toLocaleString("id-ID")}\n\n` +
+        `Apakah Anda setuju membuat kelas dengan ketentuan ini?\n` +
+        `(Klik OK = Saya Setuju, Cancel = Batal)`
+      );
+
+      if (!isConfirmed) return; // Batal jika pilih Cancel
 
       await createClass(
         title,
