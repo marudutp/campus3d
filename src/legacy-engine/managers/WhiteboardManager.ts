@@ -270,6 +270,11 @@ export class WhiteboardManager {
                 let drawWidth = 2048;
                 let drawHeight = 1024;
 
+                // Flip the image vertically to correct coordinate system mismatch
+                this.context.save();
+                this.context.scale(1, -1);
+                this.context.translate(0, -1024);
+
                 if (aspectRatio > 2) {
                     // Landscape wide
                     drawHeight = 2048 / aspectRatio;
@@ -282,6 +287,8 @@ export class WhiteboardManager {
                     // Normal
                     this.context.drawImage(img, 0, 0, 2048, 1024);
                 }
+
+                this.context.restore();
 
                 this.texture.update();
                 console.log("✅ Slide displayed:", url);
