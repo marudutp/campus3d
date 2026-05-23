@@ -270,10 +270,10 @@ export class WhiteboardManager {
                 let drawWidth = 2048;
                 let drawHeight = 1024;
 
-                // Flip the image both vertically and horizontally to correct coordinate system mismatch and fix mirror text
+                // Flip the image vertically to correct coordinate system mismatch (y=0 at bottom in Babylon.js)
                 this.context.save();
-                this.context.scale(-1, -1);
-                this.context.translate(-2048, -1024);
+                this.context.scale(1, -1);
+                this.context.translate(0, -1024);
 
                 if (aspectRatio > 2) {
                     // Landscape wide
@@ -308,6 +308,21 @@ export class WhiteboardManager {
      * Capture whiteboard sebagai image (untuk sync)
      */
     public getCanvasSnapshot(): string {
+        // Create a temporary canvas to flip the image vertically for consistent orientation
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = this.context.canvas.width;
+        tempCanvas.height = this.context.canvas.height;
+        const tempCtx = tempCanvas.getContext("2d");
+        
+        if (tempCtx) {
+            // Flip vertically to match displaySlide() transformation
+            tempCtx.scale(1, -1);
+            tempCtx.translate(0, -this.context.canvas.height);
+            tempCtx.drawImage(this.context.canvas, 0, 0);
+            return tempCanvas.toDataURL("image/png");
+        }
+        
+        // Fallback if tempCtx is null
         return this.context.canvas.toDataURL("image/png");
     }
 
