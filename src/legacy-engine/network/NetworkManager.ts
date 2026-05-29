@@ -99,7 +99,13 @@ export class NetworkManager {
     public async startVoiceChat() {
         try {
             this.localStream = await navigator.mediaDevices.getUserMedia({ 
-                audio: true,
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,  // ← Tambahkan autoGainControl
+                    sampleRate: 48000,      // ← Tambahkan sampleRate
+                    channelCount: 1         // ← Tambahkan channelCount
+                },
                 video: false 
             });
             console.log("🎤 Microphone access granted!");

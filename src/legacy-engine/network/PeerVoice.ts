@@ -1,48 +1,3 @@
-// import { NetworkManager } from "./NetworkManager";
-
-// export class PeerVoice {
-//     public peerConnection: RTCPeerConnection;
-//     private networkManager: NetworkManager;
-//     private remoteUid: string;
-
-//     constructor(networkManager: NetworkManager, remoteUid: string) {
-//         this.networkManager = networkManager;
-//         this.remoteUid = remoteUid;
-
-//         // Gunakan STUN Google agar bisa tembus firewall
-//         this.peerConnection = new RTCPeerConnection({
-//             iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
-//         });
-
-//         this.setupHandlers();
-//     }
-
-//     private setupHandlers() {
-//         // Kirim alamat ICE ke kawan sebelah
-//         this.peerConnection.onicecandidate = (event) => {
-//             if (event.candidate) {
-//                 this.networkManager.sendIceCandidate(this.remoteUid, event.candidate);
-//             }
-//         };
-
-//         // SAAT SUARA DITERIMA (Output ke Speaker)
-//         this.peerConnection.ontrack = (event) => {
-//             console.log(`🔊 Suara dari ${this.remoteUid} masuk!`);
-//             const audio = new Audio();
-//             audio.srcObject = event.streams[0];
-//             audio.autoplay = true; // Langsung nyala
-            
-//             // Masukkan ke body agar tidak di-garbage collect oleh browser
-//             document.body.appendChild(audio);
-            
-//             // Paksa putar jika tertahan browser
-//             audio.play().catch(() => {
-//                 console.warn("⚠️ Audio ditahan, butuh interaksi user di layar!");
-//             });
-//         };
-//     }
-// }
-
 import { NetworkManager } from "./NetworkManager";
 
 export class PeerVoice {
@@ -188,18 +143,21 @@ export class PeerVoice {
         // =========================
         // CONFIG
         // =========================
-        const MAX_DISTANCE = 40;
+        const MAX_DISTANCE = 80;  // ← Dinaikkan dari 40 ke 80
 
-        const MIN_VOLUME = 0;
+        const MIN_VOLUME = 0.1;   // ← Dinaikkan dari 0 ke 0.1
 
         const MAX_VOLUME = 1;
 
         // =========================
         // NORMALIZED DISTANCE
         // =========================
-        let volume =
-            1 - (distance / MAX_DISTANCE);
-
+        // Gunakan fungsi logaritmik untuk volume yang lebih halus
+        let volume = 1 - (distance / MAX_DISTANCE);
+        
+        // Tambahkan volume boost (gain) sebelum spatial attenuation
+        volume = volume * 1.5;  // ← Tambahkan 50% volume boost
+        
         volume = Math.max(
             MIN_VOLUME,
             Math.min(MAX_VOLUME, volume)
