@@ -412,7 +412,7 @@ export class AvatarManager {
         this.loadingAvatars.add(user.uid);
 
         // const fileName = user.role === ROLES.TEACHER ? "final_yeti.glb" : "final_frog.glb";
-const fileName = user.role === ROLES.TEACHER ? "kumisMixamo.glb" : "muridSiKumis.glb";
+        const fileName = user.role === ROLES.TEACHER ? "final_yeti.glb" : "final_frog.glb";
         // Create temporary dummy
         const dummy = BABYLON.MeshBuilder.CreateBox("temp_" + user.uid, { size: 0.1 }, this.scene);
         dummy.isVisible = false;
