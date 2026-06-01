@@ -194,7 +194,7 @@ import "@babylonjs/loaders/glTF";
 
 async function loadEnvironment(scene: Scene) {
     try {
-        const fileName = "ruang-meeting-minimalist.glb";
+        const fileName = "classroom.glb";
 
         const result = await SceneLoader.ImportMeshAsync(
             "",
