@@ -453,44 +453,84 @@ export async function loadTeacherDashboard(
             ".liBtn"
           ) as HTMLButtonElement;
 
-        // ===============================
-        // EDIT
-        // ===============================
-        editBtn.onclick =
-          async () => {
-            const newTitle =
-              prompt(
-                "Nama kelas baru:",
-                cls.title
-              );
+         // ===============================
+         // EDIT
+         // ===============================
+         editBtn.onclick =
+           async () => {
+             // Buat modal form untuk edit
+             const modal = document.createElement("div");
+             modal.className = "fixed inset-0 bg-black/70 flex items-center justify-center z-50";
+             modal.innerHTML = `
+               <div class="bg-[#1a1a2e] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#00CED1]/30">
+                 <h3 class="text-xl font-bold mb-6 text-[#00CED1]">Edit Kelas</h3>
+                 
+                 <div class="space-y-4">
+                   <div>
+                     <label class="block text-sm text-gray-300 mb-2">Nama Kelas</label>
+                     <input id="editTitle" type="text" value="${cls.title}" class="w-full p-3 rounded bg-black/30 text-white" />
+                   </div>
 
-            if (
-              !newTitle
-            )
-              return;
+                   <div>
+                     <label class="block text-sm text-gray-300 mb-2">Harga</label>
+                     <input id="editPrice" type="number" value="${cls.price}" class="w-full p-3 rounded bg-black/30 text-white" />
+                   </div>
 
-            const newPrice =
-              Number(
-                prompt(
-                  "Harga baru:",
-                  cls.price
-                )
-              );
+                   <div>
+                     <label class="block text-sm text-gray-300 mb-2">🏫 Tipe Classroom</label>
+                     <select id="editClassroom" class="w-full p-3 rounded bg-black/30 text-white">
+                       <option value="classroom.glb" ${cls.classroomType === "classroom.glb" ? "selected" : ""}>Classroom (Default)</option>
+                       <option value="cyber_neon_lab.glb" ${cls.classroomType === "cyber_neon_lab.glb" ? "selected" : ""}>Cyber Neon Lab</option>
+                       <option value="immersive_classroom.glb" ${cls.classroomType === "immersive_classroom.glb" ? "selected" : ""}>Immersive Classroom</option>
+                       <option value="minimalist_gallery.glb" ${cls.classroomType === "minimalist_gallery.glb" ? "selected" : ""}>Minimalist Gallery</option>
+                       <option value="ruang-meeting-minimalist.glb" ${cls.classroomType === "ruang-meeting-minimalist.glb" ? "selected" : ""}>Ruang Meeting Minimalist</option>
+                       <option value="ruang-miting-futuristik.glb" ${cls.classroomType === "ruang-miting-futuristik.glb" ? "selected" : ""}>Ruang Miting Futuristik</option>
+                       <option value="ruang-miting-minimalis-2.glb" ${cls.classroomType === "ruang-miting-minimalis-2.glb" ? "selected" : ""}>Ruang Miting Minimalis 2</option>
+                       <option value="ruang.dokter.glb" ${cls.classroomType === "ruang.dokter.glb" ? "selected" : ""}>Ruang Dokter</option>
+                       <option value="ruang.tunggu-1.glb" ${cls.classroomType === "ruang.tunggu-1.glb" ? "selected" : ""}>Ruang Tunggu 1</option>
+                       <option value="zen_studio.glb" ${cls.classroomType === "zen_studio.glb" ? "selected" : ""}>Zen Studio</option>
+                     </select>
+                   </div>
+                 </div>
 
-            await updateClass(
-              cls.id,
-              {
-                title:
-                  newTitle,
-                price:
-                  newPrice
-              }
-            );
+                 <div class="flex gap-3 mt-8">
+                   <button id="cancelEdit" class="flex-1 bg-gray-600 px-4 py-2 rounded-lg">
+                     Batal
+                   </button>
+                   <button id="saveEdit" class="flex-1 bg-[#00CED1] text-black px-4 py-2 rounded-lg font-semibold">
+                     Simpan
+                   </button>
+                 </div>
+               </div>
+             `;
 
-            loadTeacherDashboard(
-              userId
-            );
-          };
+             document.body.appendChild(modal);
+
+             const cancelBtn = modal.querySelector("#cancelEdit") as HTMLButtonElement;
+             const saveBtn = modal.querySelector("#saveEdit") as HTMLButtonElement;
+
+             cancelBtn.onclick = () => modal.remove();
+
+             saveBtn.onclick = async () => {
+               const newTitle = (modal.querySelector("#editTitle") as HTMLInputElement).value;
+               const newPrice = Number((modal.querySelector("#editPrice") as HTMLInputElement).value);
+               const newClassroom = (modal.querySelector("#editClassroom") as HTMLSelectElement).value;
+
+               if (!newTitle || newPrice <= 0) {
+                 alert("Harap isi nama kelas dan harga yang valid.");
+                 return;
+               }
+
+               await updateClass(cls.id, {
+                 title: newTitle,
+                 price: newPrice,
+                 classroomType: newClassroom
+               });
+
+               modal.remove();
+               loadTeacherDashboard(userId);
+             };
+           };
 
         // ===============================
         // DELETE + REFUND
