@@ -8,7 +8,7 @@ export class AssetLoader {
     }
 
     public static async LoadEnvironment(scene: Scene) {
-        const result = await SceneLoader.ImportMeshAsync("", "./", "ruang-meeting-minimalist.glb", scene);
+        const result = await SceneLoader.ImportMeshAsync("", "./", "classroom.glb", scene);
         result.meshes.forEach(m => {
             m.scaling.setAll(0.2); // Sesuai skala auditorium Anda
             m.checkCollisions = true;

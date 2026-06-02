@@ -25,6 +25,110 @@ export function initLanding() {
     localStorage.setItem("role", "student");
     await login();
   };
+
+  initClassSearch();
+}
+
+// =====================================
+// 🔍 INIT CLASS SEARCH
+// =====================================
+function initClassSearch() {
+  const searchInput = document.getElementById("classSearch") as HTMLInputElement;
+  if (!searchInput) return;
+
+  searchInput.addEventListener("input", async (e) => {
+    const query = (e.target as HTMLInputElement).value.toLowerCase().trim();
+    
+    if (!query) {
+      await loadLandingClasses();
+      return;
+    }
+
+    const container = document.getElementById("landingClasses")!;
+    const classes = await getClasses();
+    
+    const visibleClasses = classes.filter((cls: any) => {
+      if (!cls.date) return true;
+      return new Date(cls.date) >= new Date();
+    });
+
+    const filteredClasses = visibleClasses.filter((cls: any) =>
+      cls.title.toLowerCase().includes(query) ||
+      (cls.instructorName && cls.instructorName.toLowerCase().includes(query)) ||
+      (cls.mission && cls.mission.toLowerCase().includes(query))
+    );
+
+    container.innerHTML = "";
+
+    if (filteredClasses.length === 0) {
+      container.innerHTML = `
+        <div class="col-span-full text-center py-20">
+          <p class="text-gray-400">Tidak ada kelas yang cocok dengan pencarian "${query}"</p>
+        </div>
+      `;
+      return;
+    }
+
+    filteredClasses.forEach((cls: any) => {
+      const div = document.createElement("div");
+      div.className = "glass-card p-5 rounded-2xl hover:scale-[1.02] transition cursor-pointer";
+      div.innerHTML = `
+        ${cls.teaserUrl && isYoutubeUrl(cls.teaserUrl)
+          ? `
+            <iframe
+              src="${getEmbedUrl(cls.teaserUrl)}"
+              class="w-full h-40 mb-4 rounded-xl"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          `
+          : `
+            <div class="w-full h-40 mb-4 rounded-xl bg-gray-800 flex items-center justify-center text-gray-500">
+              🎥 Teaser segera hadir
+            </div>
+          `
+        }
+
+        <h3 class="text-lg font-bold mb-1">
+          ${cls.title}
+        </h3>
+
+        <p class="text-sm text-gray-400 mb-1">
+          👨‍🏫 ${cls.instructorName || "Pengajar"}
+        </p>
+
+        ${cls.date
+          ? `
+            <p class="text-yellow-400 text-sm mb-2">
+              📅 ${new Date(cls.date).toLocaleDateString("id-ID")}
+            </p>
+          `
+          : ""
+        }
+
+        ${cls.mission
+          ? `
+            <p class="text-gray-400 text-sm mb-3 line-clamp-2">
+              ${cls.mission}
+            </p>
+          `
+          : ""
+        }
+
+        <div class="flex justify-between items-center mt-2">
+          <p class="text-[#00CED1] font-semibold">
+            ${formatRupiah(cls.price)}
+          </p>
+          <span class="text-xs text-green-400">
+            👥 ${cls.students?.length || 0} siswa
+          </span>
+        </div>
+      `;
+
+      div.onclick = () => handleClassClick(cls);
+      container.appendChild(div);
+    });
+  });
 }
 
 // =====================================

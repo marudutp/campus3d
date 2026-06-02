@@ -111,8 +111,18 @@
         Kelas di Campus3D
       </h2>
 
-      <div id="landingClasses"
-        class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <!-- SEARCH INPUT -->
+      <div class="max-w-2xl mx-auto mb-8">
+        <input type="text" id="classSearch" 
+          placeholder="Cari kelas (contoh: acting, coding, design)" 
+          class="w-full px-6 py-4 rounded-xl border border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00CED1]">
+      </div>
+
+      <!-- SEARCH RESULTS -->
+      <div id="searchResults" class="max-w-6xl mx-auto">
+        <div id="landingClasses"
+          class="grid md:grid-cols-3 gap-6">
+        </div>
       </div>
 
     </section>
