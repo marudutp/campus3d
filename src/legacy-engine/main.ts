@@ -40,6 +40,7 @@ export async function startEngine(config: {
         displayName: string;
         role: string;
     };
+    classroomType?: string;
 }) {
     await bootstrap(config);
 }
@@ -76,6 +77,7 @@ async function bootstrap(config: {
         displayName: string;
         role: string;
     };
+    classroomType?: string;
 }) {
     if (isStarted) return;
 
@@ -108,7 +110,8 @@ async function bootstrap(config: {
 
     // 4. Initialize Babylon.js Scene & Managers
     console.log("🎮 Creating Babylon.js scene...");
-    const { scene, engine, canvas } = await createPioneerScene("renderCanvas");
+    const classroomType = config.classroomType || "classroom.glb";
+    const { scene, engine, canvas } = await createPioneerScene("renderCanvas", classroomType);
 
     const avatarManager = new AvatarManager(scene);
     // 🔥 TAMBAHKAN INI

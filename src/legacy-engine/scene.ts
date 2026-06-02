@@ -192,10 +192,8 @@
 import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, MeshBuilder, SceneLoader } from "@babylonjs/core";
 import "@babylonjs/loaders/glTF";
 
-async function loadEnvironment(scene: Scene) {
+async function loadEnvironment(scene: Scene, fileName: string = "classroom.glb") {
     try {
-        const fileName = "classroom.glb";
-
         const result = await SceneLoader.ImportMeshAsync(
             "",
             "/assets/rooms/",
@@ -246,7 +244,7 @@ async function loadEnvironment(scene: Scene) {
     }
 }
 
-export async function createPioneerScene(canvasId: string) {
+export async function createPioneerScene(canvasId: string, classroomType: string = "classroom.glb") {
     // ==========================================
     // 🔥 VALIDASI CANVAS - VERSION FINAL (NO ERROR)
     // ==========================================
@@ -282,6 +280,7 @@ export async function createPioneerScene(canvasId: string) {
     }
 
     console.log("✅ Canvas ready for Babylon.js");
+    console.log(`🏫 Loading classroom type: ${classroomType}`);
 
     // ==========================================
     // KODE ASLI MULAI DARI SINI (TIDAK BERUBAH)
@@ -298,7 +297,7 @@ export async function createPioneerScene(canvasId: string) {
 
     new HemisphericLight("light", new Vector3(0, 1, 0), scene);
 
-    await loadEnvironment(scene);
+    await loadEnvironment(scene, classroomType);
 
     engine.runRenderLoop(() => {
         scene.render();

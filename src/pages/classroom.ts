@@ -28,6 +28,13 @@ export async function loadClassroom() {
   }
 
   // ====================================
+  // FETCH CLASSROOM TYPE FROM CLASS
+  // ====================================
+  const classRef = doc(db, "classes", classId);
+  const classSnap = await getDoc(classRef);
+  const classroomType = classSnap.exists() ? (classSnap.data() as any).classroomType || "classroom.glb" : "classroom.glb";
+
+  // ====================================
   // CEK SESSION LIVE
   // ====================================
   const sessionRef = doc(db, "sessions", classId);
@@ -151,7 +158,8 @@ export async function loadClassroom() {
         uid: user.uid,                    // ✅ user dari currentUser
         displayName: user.displayName || "User",
         role: role
-      }
+      },
+      classroomType: classroomType
     });
 
     console.log("✅ Engine started - Avatar should appear");

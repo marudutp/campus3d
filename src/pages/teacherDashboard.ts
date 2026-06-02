@@ -132,23 +132,42 @@ export async function loadTeacherDashboard(
             class="mb-2 w-full p-3 rounded bg-black/30"
           />
 
-          <textarea
-            id="classMission"
-            placeholder="Tujuan / Deskripsi Kelas"
-            class="mb-2 w-full p-3 rounded bg-black/30"
-          ></textarea>
+           <textarea
+             id="classMission"
+             placeholder="Tujuan / Deskripsi Kelas"
+             class="mb-2 w-full p-3 rounded bg-black/30"
+           ></textarea>
 
-          <input
-            id="classLinkedin"
-            placeholder="Link LinkedIn"
-            class="mb-2 w-full p-3 rounded bg-black/30"
-          />
+           <label class="block text-sm text-gray-300 mb-2">
+             🏫 Pilih Tipe Classroom
+           </label>
+           <select
+             id="classroomType"
+             class="mb-2 w-full p-3 rounded bg-black/30"
+           >
+             <option value="classroom.glb">Classroom (Default)</option>
+             <option value="cyber_neon_lab.glb">Cyber Neon Lab</option>
+             <option value="immersive_classroom.glb">Immersive Classroom</option>
+             <option value="minimalist_gallery.glb">Minimalist Gallery</option>
+             <option value="ruang-meeting-minimalist.glb">Ruang Meeting Minimalist</option>
+             <option value="ruang-miting-futuristik.glb">Ruang Miting Futuristik</option>
+             <option value="ruang-miting-minimalis-2.glb">Ruang Miting Minimalis 2</option>
+             <option value="ruang.dokter.glb">Ruang Dokter</option>
+             <option value="ruang.tunggu-1.glb">Ruang Tunggu 1</option>
+             <option value="zen_studio.glb">Zen Studio</option>
+           </select>
 
-          <input
-            id="classTeaser"
-            placeholder="Link YouTube Teaser"
-            class="mb-4 w-full p-3 rounded bg-black/30"
-          />
+           <input
+             id="classLinkedin"
+             placeholder="Link LinkedIn"
+             class="mb-2 w-full p-3 rounded bg-black/30"
+           />
+
+           <input
+             id="classTeaser"
+             placeholder="Link YouTube Teaser"
+             class="mb-4 w-full p-3 rounded bg-black/30"
+           />
 
           <button
             id="createBtn"
@@ -234,6 +253,13 @@ export async function loadTeacherDashboard(
           ) as HTMLInputElement
         ).value;
 
+      const classroomType =
+        (
+          document.getElementById(
+            "classroomType"
+          ) as HTMLSelectElement
+        ).value;
+
       const instructorName =
         currentUser?.displayName ||
         "Pengajar";
@@ -252,7 +278,8 @@ export async function loadTeacherDashboard(
       const isConfirmed = confirm(
         `⚠️ KONFIRMASI PEMBUATAN KELAS ⚠️\n\n` +
         `Nama Kelas : ${title}\n` +
-        `Harga Kelas: Rp ${price.toLocaleString("id-ID")}\n\n` +
+        `Harga Kelas: Rp ${price.toLocaleString("id-ID")}\n` +
+        `Tipe Classroom: ${classroomType}\n\n` +
         `💰 Potongan Platform (30%): Rp ${potongan.toLocaleString("id-ID")}\n` +
         `✅ Pendapatan yang Anda terima: Rp ${pendapatanBersih.toLocaleString("id-ID")}\n\n` +
         `Apakah Anda setuju membuat kelas dengan ketentuan ini?\n` +
@@ -268,7 +295,8 @@ export async function loadTeacherDashboard(
         mission,
         instructorName,
         linkedin,
-        teaser
+        teaser,
+        classroomType
       );
 
       alert(

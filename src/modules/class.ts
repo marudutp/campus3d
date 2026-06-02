@@ -25,7 +25,8 @@ export async function createClass(
   mission: string = "",
   instructorName: string = "Pengajar",
   linkedin: string = "",
-  teaserUrl: string = ""
+  teaserUrl: string = "",
+  classroomType: string = "classroom.glb"
 ) {
   if (!title || !instructorId) {
     throw new Error("Data kelas tidak valid");
@@ -38,6 +39,7 @@ export async function createClass(
     instructorName,
     linkedin,
     teaserUrl,
+    classroomType,
 
     instructors: [instructorId],
     students: [],
@@ -87,6 +89,7 @@ export async function updateClass(
     instructorName: string;
     linkedin: string;
     teaserUrl: string;
+    classroomType: string;
     status: string;
     students: string[];
   }>
