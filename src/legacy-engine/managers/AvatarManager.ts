@@ -403,22 +403,28 @@ export class AvatarManager {
     /**
      * Create avatar untuk user (local atau remote)
      */
-    public createAvatar(user: UserData): BABYLON.AbstractMesh {
-        // Cek apakah avatar sudah ada atau sedang loading
-        if (this.avatars.has(user.uid) || this.loadingAvatars.has(user.uid)) {
-            return this.avatars.get(user.uid) || this.scene.getMeshByName("ctrl-" + user.uid)!;
-        }
+     public createAvatar(user: UserData): BABYLON.AbstractMesh {
+         // Cek apakah avatar sudah ada atau sedang loading
+         if (this.avatars.has(user.uid) || this.loadingAvatars.has(user.uid)) {
+             return this.avatars.get(user.uid) || this.scene.getMeshByName("ctrl-" + user.uid)!;
+         }
 
-        this.loadingAvatars.add(user.uid);
+         this.loadingAvatars.add(user.uid);
 
-        // const fileName = user.role === ROLES.TEACHER ? "final_yeti.glb" : "final_frog.glb";
-        const fileName = user.role === ROLES.TEACHER ? "final_yeti.glb" : "final_frog.glb";
-        // Create temporary dummy
-        const dummy = BABYLON.MeshBuilder.CreateBox("temp_" + user.uid, { size: 0.1 }, this.scene);
-        dummy.isVisible = false;
+         // Baca avatar dari localStorage
+         let fileName: string;
+         if (user.role === ROLES.TEACHER) {
+             fileName = localStorage.getItem("teacherAvatar") || "final_frog.glb";
+         } else {
+             fileName = localStorage.getItem("studentAvatar") || "bocahMale.glb";
+         }
+         
+         // Create temporary dummy
+         const dummy = BABYLON.MeshBuilder.CreateBox("temp_" + user.uid, { size: 0.1 }, this.scene);
+         dummy.isVisible = false;
 
-        // Load model
-        BABYLON.SceneLoader.ImportMeshAsync("", "/assets/avatar/", fileName, this.scene).then((result) => {
+         // Load model
+         BABYLON.SceneLoader.ImportMeshAsync("", "/assets/avatar/", fileName, this.scene).then((result) => {
             const root = result.meshes[0];
 
             // Create controller capsule
