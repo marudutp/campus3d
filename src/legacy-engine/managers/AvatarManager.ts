@@ -413,10 +413,14 @@ export class AvatarManager {
 
          // Baca avatar dari localStorage
          let fileName: string;
+         let avatarPath: string;
+         
          if (user.role === ROLES.TEACHER) {
              fileName = localStorage.getItem("teacherAvatar") || "final_frog.glb";
+             avatarPath = "/assets/avatar/";
          } else {
              fileName = localStorage.getItem("studentAvatar") || "bocahMale.glb";
+             avatarPath = "/assets/avatar/students/";
          }
          
          // Create temporary dummy
@@ -424,7 +428,7 @@ export class AvatarManager {
          dummy.isVisible = false;
 
          // Load model
-         BABYLON.SceneLoader.ImportMeshAsync("", "/assets/avatar/", fileName, this.scene).then((result) => {
+         BABYLON.SceneLoader.ImportMeshAsync("", avatarPath, fileName, this.scene).then((result) => {
             const root = result.meshes[0];
 
             // Create controller capsule
