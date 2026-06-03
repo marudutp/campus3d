@@ -423,12 +423,16 @@ export class AvatarManager {
              avatarPath = "/assets/avatar/students/";
          }
          
+         console.log(`🎯 Loading ${user.role} avatar: ${avatarPath}${fileName}`);
+         
          // Create temporary dummy
          const dummy = BABYLON.MeshBuilder.CreateBox("temp_" + user.uid, { size: 0.1 }, this.scene);
          dummy.isVisible = false;
 
-         // Load model
-         BABYLON.SceneLoader.ImportMeshAsync("", avatarPath, fileName, this.scene).then((result) => {
+         // Load model dengan timeout
+         const loadPromise = BABYLON.SceneLoader.ImportMeshAsync("", avatarPath, fileName, this.scene);
+         
+         loadPromise.then((result) => {
             const root = result.meshes[0];
 
             // Create controller capsule
