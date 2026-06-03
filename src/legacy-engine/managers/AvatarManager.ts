@@ -429,10 +429,14 @@ export class AvatarManager {
          const dummy = BABYLON.MeshBuilder.CreateBox("temp_" + user.uid, { size: 0.1 }, this.scene);
          dummy.isVisible = false;
 
-         // Load model dengan timeout protection
+         // Load model dengan timeout protection dan disable KTX2
          const timeoutPromise = new Promise((_, reject) =>
              setTimeout(() => reject(new Error("Avatar loading timeout")), 10000)
          );
+         
+         // Disable KTX2 temporarily untuk menghindari texture loading issues
+         const ktx2Backup = (BABYLON as any).KhronosTextureContainer2;
+         (BABYLON as any).KhronosTextureContainer2 = null;
          
          const loadPromise = Promise.race([
              BABYLON.SceneLoader.ImportMeshAsync("", avatarPath, fileName, this.scene),
@@ -440,6 +444,9 @@ export class AvatarManager {
          ]);
          
          loadPromise.then((result: any) => {
+            // Restore KTX2
+            (BABYLON as any).KhronosTextureContainer2 = ktx2Backup;
+            
             const root = result.meshes[0];
 
             // Create controller capsule
