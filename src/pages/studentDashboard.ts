@@ -39,12 +39,12 @@ async function logout() {
 // =====================================
 const STUDENT_AVATARS = [
   "bocahMale.glb",
-  "GeorgeLight.glb",
-  "LeelaLight.glb",
-  "MikeLight.glb",
-  "muridSiKumis.glb",
-  "StanLight.glb",
-  "YetiLight.glb"
+  "GeorgeLight.glb","muridSiKumis.glb"
+  // "LeelaLight.glb",
+  // "MikeLight.glb",
+  // "muridSiKumis.glb",
+  // "StanLight.glb",
+  // "YetiLight.glb"
 ];
 
 function getStudentAvatar(): string {
