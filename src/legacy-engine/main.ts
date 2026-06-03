@@ -23,15 +23,22 @@ BABYLON.DracoCompression.Configuration = {
     }
 };
 
-(BABYLON.KhronosTextureContainer2 as any).URLConfig = {
-    jsDecoderModule: "https://cdn.babylonjs.com/babylon.ktx2Decoder.js",
-    wasmUASTCToASTC: "https://cdn.babylonjs.com/wasm/uastc_astc.wasm",
-    wasmUASTCToBC7: "https://cdn.babylonjs.com/wasm/uastc_bc7.wasm",
-    wasmUASTCToRGBA_UNORM: "https://cdn.babylonjs.com/wasm/uastc_rgba8_unorm.wasm",
-    wasmUASTCToRGBA_SRGB: "https://cdn.babylonjs.com/wasm/uastc_rgba8_srgb.wasm",
-    wasmMSCTranscoder: "https://cdn.babylonjs.com/wasm/msc_basis_transcoder.wasm",
-    jsMSCTranscoder: "https://cdn.babylonjs.com/babylon.msc_basis_transcoder.js"
-};
+// Disable KTX2 dengan timeout untuk avoid freezing
+try {
+    (BABYLON.KhronosTextureContainer2 as any).URLConfig = {
+        jsDecoderModule: "https://cdn.babylonjs.com/babylon.ktx2Decoder.js",
+        wasmUASTCToASTC: "https://cdn.babylonjs.com/wasm/uastc_astc.wasm",
+        wasmUASTCToBC7: "https://cdn.babylonjs.com/wasm/uastc_bc7.wasm",
+        wasmUASTCToRGBA_UNORM: "https://cdn.babylonjs.com/wasm/uastc_rgba8_unorm.wasm",
+        wasmUASTCToRGBA_SRGB: "https://cdn.babylonjs.com/wasm/uastc_rgba8_srgb.wasm",
+        wasmMSCTranscoder: "https://cdn.babylonjs.com/wasm/msc_basis_transcoder.wasm",
+        jsMSCTranscoder: "https://cdn.babylonjs.com/babylon.msc_basis_transcoder.js"
+    };
+    // Disable KTX2 engine
+    (BABYLON as any).Engine.prototype._createImageProcessingConfiguration = function() {};
+} catch(e) {
+    console.warn("⚠️ KTX2 config error (non-critical):", e);
+}
 
 export async function startEngine(config: {
     sessionId: string;

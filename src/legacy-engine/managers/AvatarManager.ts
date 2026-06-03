@@ -429,10 +429,17 @@ export class AvatarManager {
          const dummy = BABYLON.MeshBuilder.CreateBox("temp_" + user.uid, { size: 0.1 }, this.scene);
          dummy.isVisible = false;
 
-         // Load model dengan timeout
-         const loadPromise = BABYLON.SceneLoader.ImportMeshAsync("", avatarPath, fileName, this.scene);
+         // Load model dengan timeout protection
+         const timeoutPromise = new Promise((_, reject) =>
+             setTimeout(() => reject(new Error("Avatar loading timeout")), 10000)
+         );
          
-         loadPromise.then((result) => {
+         const loadPromise = Promise.race([
+             BABYLON.SceneLoader.ImportMeshAsync("", avatarPath, fileName, this.scene),
+             timeoutPromise
+         ]);
+         
+         loadPromise.then((result: any) => {
             const root = result.meshes[0];
 
             // Create controller capsule
@@ -458,7 +465,7 @@ export class AvatarManager {
 
             // Store animations
             const animMap = new Map<string, AnimationGroup>();
-            result.animationGroups.forEach(anim => {
+            result.animationGroups.forEach((anim: AnimationGroup) => {
                 anim.stop();
                 anim.enableBlending = true;
                 animMap.set(anim.name.toLowerCase(), anim);
