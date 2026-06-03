@@ -35,6 +35,73 @@ async function logout() {
 }
 
 // =====================================
+// AVATAR
+// =====================================
+const STUDENT_AVATARS = [
+  "bocahMale.glb",
+  "GeorgeLight.glb",
+  "LeelaLight.glb",
+  "MikeLight.glb",
+  "muridSiKumis.glb",
+  "StanLight.glb",
+  "YetiLight.glb"
+];
+
+function getStudentAvatar(): string {
+  return localStorage.getItem("studentAvatar") || "bocahMale.glb";
+}
+
+function saveStudentAvatar(avatar: string) {
+  localStorage.setItem("studentAvatar", avatar);
+}
+
+function showAvatarPicker() {
+  const modal = document.createElement("div");
+  modal.className = "fixed inset-0 bg-black/70 flex items-center justify-center z-50";
+  
+  const currentAvatar = getStudentAvatar();
+  const avatarOptions = STUDENT_AVATARS.map(avatar => `
+    <div class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-black/50 ${currentAvatar === avatar ? 'border-[#00CED1]' : 'border-gray-600'}" data-avatar="${avatar}">
+      <input type="radio" name="avatar" value="${avatar}" ${currentAvatar === avatar ? 'checked' : ''} />
+      <label class="flex-1 cursor-pointer">${avatar.replace('.glb', '')}</label>
+    </div>
+  `).join('');
+  
+  modal.innerHTML = `
+    <div class="bg-[#1a1a2e] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#00CED1]/30">
+      <h3 class="text-xl font-bold mb-6 text-[#00CED1]">Pilih Avatar</h3>
+      
+      <div class="space-y-3 mb-6">
+        ${avatarOptions}
+      </div>
+      
+      <div class="flex gap-3">
+        <button class="flex-1 bg-gray-600 px-4 py-2 rounded-lg cancelAvatarBtn">
+          Batal
+        </button>
+        <button class="flex-1 bg-[#00CED1] text-black px-4 py-2 rounded-lg font-semibold saveAvatarBtn">
+          Simpan
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  const cancelBtn = modal.querySelector(".cancelAvatarBtn") as HTMLButtonElement;
+  const saveBtn = modal.querySelector(".saveAvatarBtn") as HTMLButtonElement;
+  
+  cancelBtn.onclick = () => modal.remove();
+  
+  saveBtn.onclick = () => {
+    const selected = (modal.querySelector('input[name="avatar"]:checked') as HTMLInputElement).value;
+    saveStudentAvatar(selected);
+    modal.remove();
+    location.reload();
+  };
+}
+
+// =====================================
 // 🎓 STUDENT DASHBOARD FINAL + WAITING ROOM
 // =====================================
 export async function loadStudentDashboard(
@@ -74,12 +141,21 @@ export async function loadStudentDashboard(
           </span>
         </h2>
 
-        <button
-          id="logoutBtn"
-          class="bg-red-500/20 border border-red-500 px-4 py-2 rounded-lg hover:bg-red-500/40 transition"
-        >
-          Logout
-        </button>
+        <div class="flex gap-2">
+          <button
+            id="editAvatarBtn"
+            class="bg-[#00CED1]/20 border border-[#00CED1] px-4 py-2 rounded-lg hover:bg-[#00CED1]/30 transition"
+          >
+            🎭 Edit Avatar
+          </button>
+
+          <button
+            id="logoutBtn"
+            class="bg-red-500/20 border border-red-500 px-4 py-2 rounded-lg hover:bg-red-500/40 transition"
+          >
+            Logout
+          </button>
+        </div>
 
       </div>
 
@@ -175,6 +251,13 @@ export async function loadStudentDashboard(
 
     </div>
   `;
+
+  // =====================================
+  // EDIT AVATAR
+  // =====================================
+  document.getElementById(
+    "editAvatarBtn"
+  )!.onclick = showAvatarPicker;
 
   // =====================================
   // LOGOUT
