@@ -1,6 +1,7 @@
 import {
   getClasses,
-  joinClass
+  joinClass,
+  requestClassActivation
 } from "../modules/class";
 
 import {
@@ -418,6 +419,10 @@ export async function loadStudentDashboard(
           userId
         );
 
+      const isInactive = cls.status === "inactive";
+      const statusColor = isInactive ? "text-red-400" : "text-green-400";
+      const statusText = isInactive ? "🔴 Inactive" : "🟢 Active";
+
       const div =
         document.createElement(
           "div"
@@ -435,6 +440,10 @@ export async function loadStudentDashboard(
           👨‍🏫 ${cls.instructorName ||
         "Pengajar"
         }
+        </p>
+
+        <p class="${statusColor} text-sm font-semibold mb-2">
+          ${statusText}
         </p>
 
         ${cls.date
@@ -458,7 +467,15 @@ export async function loadStudentDashboard(
         )}
         </p>
 
-        ${isJoined
+        ${isInactive
+          ? `
+            <button
+              class="requestBtn bg-yellow-500 text-black px-4 py-2 rounded-lg w-full font-semibold"
+            >
+              📨 Request Kelas
+            </button>
+          `
+          : isJoined
           ? `
             <button
               class="enterWaitingBtn bg-green-500 text-white px-4 py-2 rounded-lg w-full font-semibold"
@@ -477,9 +494,34 @@ export async function loadStudentDashboard(
       `;
 
       // ===============================
+      // REQUEST INACTIVE CLASS
+      // ===============================
+      if (isInactive) {
+        const requestBtn =
+          div.querySelector(
+            ".requestBtn"
+          ) as HTMLButtonElement;
+
+        requestBtn.onclick =
+          async () => {
+            await requestClassActivation(
+              cls.id,
+              userId,
+              currentUser?.displayName || "Siswa"
+            );
+
+            alert(
+              "Permintaan berhasil dikirim ke guru! 📨"
+            );
+
+            location.reload();
+          };
+      }
+
+      // ===============================
       // BELUM JOIN
       // ===============================
-      if (!isJoined) {
+      if (!isInactive && !isJoined) {
         const btn =
           div.querySelector(
             ".joinBtn"
@@ -510,7 +552,7 @@ export async function loadStudentDashboard(
       // ===============================
       // SUDAH JOIN
       // ===============================
-      if (isJoined) {
+      if (!isInactive && isJoined) {
         const enterBtn =
           div.querySelector(
             ".enterWaitingBtn"

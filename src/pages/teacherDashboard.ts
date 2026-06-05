@@ -2,7 +2,8 @@ import {
   createClass,
   getClasses,
   updateClass,
-  deleteClass
+  deleteClass,
+  getClassRequests
 } from "../modules/class";
 
 import {
@@ -15,7 +16,10 @@ import {
 
 import {
   addDoc,
-  collection
+  collection,
+  query,
+  where,
+  getDocs
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
@@ -236,17 +240,35 @@ export async function loadTeacherDashboard(
            />
 
            <input
-             id="classTeaser"
-             placeholder="Link YouTube Teaser"
-             class="mb-4 w-full p-3 rounded bg-black/30"
-           />
+              id="classTeaser"
+              placeholder="Link YouTube Teaser"
+              class="mb-4 w-full p-3 rounded bg-black/30"
+            />
 
-          <button
-            id="createBtn"
-            class="bg-[#00CED1] text-black px-5 py-3 rounded-lg font-semibold"
-          >
-            Buat Kelas
-          </button>
+            <label class="block text-sm text-gray-300 mb-2">
+              📅 Tanggal Mulai Kelas
+            </label>
+            <input
+              id="classStartDate"
+              type="date"
+              class="mb-4 w-full p-3 rounded bg-black/30"
+            />
+
+            <label class="block text-sm text-gray-300 mb-2">
+              📅 Tanggal Akhir Kelas
+            </label>
+            <input
+              id="classEndDate"
+              type="date"
+              class="mb-4 w-full p-3 rounded bg-black/30"
+            />
+
+           <button
+             id="createBtn"
+             class="bg-[#00CED1] text-black px-5 py-3 rounded-lg font-semibold"
+           >
+             Buat Kelas
+           </button>
 
         </div>
 
@@ -339,6 +361,20 @@ export async function loadTeacherDashboard(
           ) as HTMLSelectElement
         ).value;
 
+      const startDate =
+        (
+          document.getElementById(
+            "classStartDate"
+          ) as HTMLInputElement
+        ).value;
+
+      const endDate =
+        (
+          document.getElementById(
+            "classEndDate"
+          ) as HTMLInputElement
+        ).value;
+
       const instructorName =
         currentUser?.displayName ||
         "Pengajar";
@@ -358,7 +394,9 @@ export async function loadTeacherDashboard(
         `⚠️ KONFIRMASI PEMBUATAN KELAS ⚠️\n\n` +
         `Nama Kelas : ${title}\n` +
         `Harga Kelas: Rp ${price.toLocaleString("id-ID")}\n` +
-        `Tipe Classroom: ${classroomType}\n\n` +
+        `Tipe Classroom: ${classroomType}\n` +
+        `Tanggal Mulai: ${startDate || 'Belum diatur'}\n` +
+        `Tanggal Akhir: ${endDate || 'Belum diatur'}\n\n` +
         `💰 Potongan Platform (30%): Rp ${potongan.toLocaleString("id-ID")}\n` +
         `✅ Pendapatan yang Anda terima: Rp ${pendapatanBersih.toLocaleString("id-ID")}\n\n` +
         `Apakah Anda setuju membuat kelas dengan ketentuan ini?\n` +
@@ -375,7 +413,9 @@ export async function loadTeacherDashboard(
         instructorName,
         linkedin,
         teaser,
-        classroomType
+        classroomType,
+        startDate,
+        endDate
       );
 
       alert(
@@ -386,6 +426,61 @@ export async function loadTeacherDashboard(
         userId
       );
     };
+
+  // =====================================
+  // CLASS REQUEST NOTIFICATIONS
+  // =====================================
+  const myClasses = await getClasses();
+  const myClassIds = myClasses
+    .filter((c: any) => c.instructors?.includes(userId))
+    .map((c: any) => c.id);
+
+  const notificationDiv = document.createElement("div");
+  notificationDiv.id = "classRequestNotifications";
+  notificationDiv.className = "max-w-6xl mx-auto mb-6 space-y-3";
+
+  for (const classId of myClassIds) {
+    const requests = await getClassRequests(classId);
+    
+    requests.forEach((req: any) => {
+      const notifEl = document.createElement("div");
+      notifEl.className = "bg-blue-500/20 border border-blue-500 p-4 rounded-xl flex items-center justify-between";
+      notifEl.innerHTML = `
+        <div class="flex-1">
+          <p class="text-blue-300 font-semibold">📨 Permintaan Kelas dari <strong>${req.studentName}</strong></p>
+          <p class="text-sm text-blue-200">Siswa ingin membuka kelas yang sedang inactive.</p>
+        </div>
+        <div class="flex gap-2 ml-4">
+          <button class="okBtn bg-green-500 px-3 py-2 rounded text-sm font-semibold" data-req-id="${req.id}">
+            OK
+          </button>
+          <button class="activateBtn bg-blue-600 px-3 py-2 rounded text-sm font-semibold" data-class-id="${classId}">
+            Aktifkan Kelas
+          </button>
+        </div>
+      `;
+      
+      const okBtn = notifEl.querySelector(".okBtn") as HTMLButtonElement;
+      const activateBtn = notifEl.querySelector(".activateBtn") as HTMLButtonElement;
+      
+      okBtn.onclick = () => notifEl.remove();
+      
+      activateBtn.onclick = async () => {
+        await updateClass(classId, { status: "open" });
+        alert("Kelas berhasil diaktifkan! ✅");
+        loadTeacherDashboard(userId);
+      };
+      
+      notificationDiv.appendChild(notifEl);
+    });
+  }
+
+  if (notificationDiv.children.length > 0) {
+    const container = document.querySelector(".max-w-6xl");
+    if (container) {
+      container.appendChild(notificationDiv);
+    }
+  }
 
   // =====================================
   // LOAD CLASSES
@@ -570,6 +665,16 @@ export async function loadTeacherDashboard(
                        <option value="zen_studio.glb" ${cls.classroomType === "zen_studio.glb" ? "selected" : ""}>Zen Studio</option>
                      </select>
                    </div>
+
+                   <div>
+                     <label class="block text-sm text-gray-300 mb-2">📅 Tanggal Mulai</label>
+                     <input id="editStartDate" type="date" value="${cls.startDate || ''}" class="w-full p-3 rounded bg-black/30 text-white" />
+                   </div>
+
+                   <div>
+                     <label class="block text-sm text-gray-300 mb-2">📅 Tanggal Akhir</label>
+                     <input id="editEndDate" type="date" value="${cls.endDate || ''}" class="w-full p-3 rounded bg-black/30 text-white" />
+                   </div>
                  </div>
 
                  <div class="flex gap-3 mt-8">
@@ -594,16 +699,23 @@ export async function loadTeacherDashboard(
                const newTitle = (modal.querySelector("#editTitle") as HTMLInputElement).value;
                const newPrice = Number((modal.querySelector("#editPrice") as HTMLInputElement).value);
                const newClassroom = (modal.querySelector("#editClassroom") as HTMLSelectElement).value;
+               const newStartDate = (modal.querySelector("#editStartDate") as HTMLInputElement).value;
+               const newEndDate = (modal.querySelector("#editEndDate") as HTMLInputElement).value;
 
                if (!newTitle || newPrice <= 0) {
                  alert("Harap isi nama kelas dan harga yang valid.");
                  return;
                }
 
+               const newStatus = !newStartDate || !newEndDate ? "inactive" : "open";
+
                await updateClass(cls.id, {
                  title: newTitle,
                  price: newPrice,
-                 classroomType: newClassroom
+                 classroomType: newClassroom,
+                 startDate: newStartDate,
+                 endDate: newEndDate,
+                 status: newStatus
                });
 
                modal.remove();
