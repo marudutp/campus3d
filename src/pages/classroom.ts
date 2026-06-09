@@ -237,13 +237,22 @@ export async function loadClassroom() {
     // Load Earth
     loadEarthBtn?.addEventListener("click", async () => {
       const networkManager = (window as any).networkManager;
+      const scene = (window as any).scene;
+      
       if (networkManager && networkManager.movementSocket) {
+        // Emit to server untuk semua students
         networkManager.movementSocket.emit("showcase-load", {
           filename: "earth.glb",
           userId: user.uid,
           displayName: user.displayName
         });
         console.log("📡 Showcase load event sent: earth.glb");
+        
+        // Load langsung untuk guru (tidak perlu tunggu socket reply)
+        if (scene) {
+          await loadShowcaseObject(scene, "earth.glb");
+          console.log("✅ Showcase loaded on teacher screen");
+        }
       }
       showcaseMenu?.classList.add("hidden");
     });
@@ -251,47 +260,61 @@ export async function loadClassroom() {
     // Remove Showcase
     removeShowcaseBtn?.addEventListener("click", async () => {
       const networkManager = (window as any).networkManager;
+      const showcaseObj = (window as any).showcaseObject;
+      
       if (networkManager && networkManager.movementSocket) {
         networkManager.movementSocket.emit("showcase-remove", {
           userId: user.uid
         });
         console.log("📡 Showcase remove event sent");
       }
+      
+      // Remove langsung untuk guru
+      if (showcaseObj) {
+        showcaseObj.dispose();
+        (window as any).showcaseObject = null;
+        console.log("✅ Showcase removed on teacher screen");
+      }
+      
       showcaseMenu?.classList.add("hidden");
     });
   }
 
-  // ====================================
-  // LISTEN FOR SHOWCASE EVENTS (ALL USERS)
-  // ====================================
-  setTimeout(() => {
-    const networkManager = (window as any).networkManager;
-    if (networkManager && networkManager.movementSocket) {
-      const socket = networkManager.movementSocket;
+   // ====================================
+   // LISTEN FOR SHOWCASE EVENTS (ALL USERS)
+   // ====================================
+   setTimeout(() => {
+     const networkManager = (window as any).networkManager;
+     if (networkManager && networkManager.movementSocket) {
+       const socket = networkManager.movementSocket;
 
-      socket.on("showcase-load", (data: any) => {
-        console.log("📡 Received showcase-load:", data);
-        const scene = (window as any).scene;
-        const showcaseObj = (window as any).showcaseObject;
+       // 🔥 HANDLE SHOWCASE-LOAD EVENT
+       socket.on("showcase-load", (data: any) => {
+         console.log("📡 Received showcase-load:", data);
+         const scene = (window as any).scene;
+         const showcaseObj = (window as any).showcaseObject;
 
-        if (showcaseObj) {
-          showcaseObj.dispose();
-        }
+         if (showcaseObj) {
+           showcaseObj.dispose();
+         }
 
-        loadShowcaseObject(scene, data.filename);
-      });
+         // Load showcase object file
+         loadShowcaseObject(scene, data.filename);
+         console.log(`✅ Showcase loaded: ${data.filename} (showcaseUid: ${data.showcaseUid})`);
+       });
 
-      socket.on("showcase-remove", () => {
-        console.log("📡 Received showcase-remove");
-        const showcaseObj = (window as any).showcaseObject;
-        if (showcaseObj) {
-          showcaseObj.dispose();
-          (window as any).showcaseObject = null;
-          console.log("✅ Showcase object removed");
-        }
-      });
-    }
-  }, 1000);
+       // 🔥 HANDLE SHOWCASE-REMOVE EVENT
+       socket.on("showcase-remove", () => {
+         console.log("📡 Received showcase-remove");
+         const showcaseObj = (window as any).showcaseObject;
+         if (showcaseObj) {
+           showcaseObj.dispose();
+           (window as any).showcaseObject = null;
+           console.log("✅ Showcase object removed");
+         }
+       });
+     }
+   }, 1000);
 }
 
 // ====================================
@@ -299,9 +322,18 @@ export async function loadClassroom() {
 // ====================================
 async function loadShowcaseObject(scene: any, filename: string) {
   try {
-    const { SceneLoader } = await import("@babylonjs/core");
+    console.log("🔄 Starting to load showcase:", filename);
+    
+    if (!scene) {
+      console.error("❌ Scene is null!");
+      return;
+    }
+
+    const { SceneLoader, Vector3 } = await import("@babylonjs/core");
     await import("@babylonjs/loaders/glTF");
 
+    console.log("📥 Importing mesh from /assets/showcases/" + filename);
+    
     const result = await SceneLoader.ImportMeshAsync(
       "",
       "/assets/showcases/",
@@ -309,26 +341,81 @@ async function loadShowcaseObject(scene: any, filename: string) {
       scene
     );
 
-    const root = result.meshes[0];
-    console.log("✅ Showcase object loaded:", filename);
+    console.log("✅ Import result:", {
+      meshCount: result.meshes.length,
+      skeletonsCount: result.skeletons.length,
+      animationGroupsCount: result.animationGroups.length
+    });
 
-    // Center dan scale
-    const bounding = root.getHierarchyBoundingVectors(true);
-    const height = bounding.max.y - bounding.min.y;
-    const targetHeight = 5;
-    const scaleFactor = targetHeight / height;
+    if (!result.meshes || result.meshes.length === 0) {
+      console.error("❌ No meshes imported!");
+      return;
+    }
+
+    // Group all meshes
+    const meshes = result.meshes;
+    let root = meshes[0];
+
+    // Hitung bounding box dari semua meshes
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+
+    meshes.forEach((mesh: any) => {
+      if (mesh.getBoundingInfo) {
+        const bb = mesh.getBoundingInfo();
+        minX = Math.min(minX, bb.minimum.x);
+        maxX = Math.max(maxX, bb.maximum.x);
+        minY = Math.min(minY, bb.minimum.y);
+        maxY = Math.max(maxY, bb.maximum.y);
+        minZ = Math.min(minZ, bb.minimum.z);
+        maxZ = Math.max(maxZ, bb.maximum.z);
+      }
+    });
+
+    const height = maxY - minY;
+    const width = maxX - minX;
+    const depth = maxZ - minZ;
+    
+    console.log("📐 Bounding box:", { width, height, depth, minY, maxY });
+
+    // Scale agar tidak terlalu besar
+    const targetHeight = 3;
+    const scaleFactor = height > 0 ? targetHeight / height : 1;
+    
     root.scaling.setAll(scaleFactor);
     root.computeWorldMatrix(true);
 
-    // Position di depan kamera
-    root.position.set(0, 1, 5);
+    // Position agar terlihat
+    const cameraTarget = scene.activeCamera?.target || new Vector3(0, 1, 0);
+    const offsetDistance = 4;
+    const direction = scene.activeCamera?.direction || new Vector3(0, 0, 1);
+    direction.normalize();
+    
+    const posX = cameraTarget.x + direction.x * offsetDistance;
+    const posY = cameraTarget.y + 0.5;
+    const posZ = cameraTarget.z + direction.z * offsetDistance;
+    
+    root.position.set(posX, posY, posZ);
+    
+    console.log("📍 Object positioned at:", { x: posX, y: posY, z: posZ });
+
+    // Setiap mesh visible
+    meshes.forEach((mesh: any) => {
+      mesh.isVisible = true;
+    });
 
     // Simpan reference global
     (window as any).showcaseObject = root;
+    (window as any).showcaseMeshes = meshes;
 
-    console.log("🎪 Showcase displayed!");
+    console.log("🎪 Showcase displayed! Total meshes:", meshes.length);
   } catch (err) {
     console.error("❌ Failed to load showcase:", err);
+    if (err instanceof Error) {
+      console.error("   Error message:", err.message);
+      console.error("   Error stack:", err.stack);
+    }
   }
 }
 

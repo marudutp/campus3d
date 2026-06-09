@@ -400,28 +400,45 @@ export class AvatarManager {
     // AVATAR CREATION
     // ============================================
 
-    /**
-     * Create avatar untuk user (local atau remote)
-     */
-     public createAvatar(user: UserData): BABYLON.AbstractMesh {
-         // Cek apakah avatar sudah ada atau sedang loading
-         if (this.avatars.has(user.uid) || this.loadingAvatars.has(user.uid)) {
-             return this.avatars.get(user.uid) || this.scene.getMeshByName("ctrl-" + user.uid)!;
-         }
+     /**
+      * Create avatar untuk user (local atau remote)
+      */
+      public createAvatar(user: UserData): BABYLON.AbstractMesh {
+          // Cek apakah avatar sudah ada atau sedang loading
+          if (this.avatars.has(user.uid) || this.loadingAvatars.has(user.uid)) {
+              return this.avatars.get(user.uid) || this.scene.getMeshByName("ctrl-" + user.uid)!;
+          }
 
-         this.loadingAvatars.add(user.uid);
+          this.loadingAvatars.add(user.uid);
 
-         // Baca avatar dari localStorage
-         let fileName: string;
-         let avatarPath: string;
-         
-         if (user.role === ROLES.TEACHER) {
-             fileName = localStorage.getItem("teacherAvatar") || "final_frog.glb";
-             avatarPath = "/assets/avatar/";
-         } else {
-             fileName = localStorage.getItem("studentAvatar") || "bocahMale.glb";
-             avatarPath = "/assets/avatar/students/";
-         }
+          // 🔥 HANDLE SHOWCASE ENTITY - JANGAN LOAD AVATAR, HANYA BUAT PLACEHOLDER
+          if (user.role === "showcase") {
+              console.log(`🎪 Creating showcase entity: ${user.uid} (${user.displayName})`);
+              
+              // Create dummy placeholder untuk showcase (tidak perlu model avatar)
+              const dummy = BABYLON.MeshBuilder.CreateBox(user.uid, { size: 0.1 }, this.scene);
+              dummy.isVisible = false;
+              dummy.position.set(user.x || 0, this.GROUND_Y, user.z || 0);
+              
+              this.avatars.set(user.uid, dummy);
+              this.addNameTag(dummy, user.uid, user.displayName);
+              this.loadingAvatars.delete(user.uid);
+              
+              console.log(`✅ Showcase entity created: ${user.uid}`);
+              return dummy;
+          }
+
+          // Baca avatar dari localStorage
+          let fileName: string;
+          let avatarPath: string;
+          
+          if (user.role === ROLES.TEACHER) {
+              fileName = localStorage.getItem("teacherAvatar") || "final_frog.glb";
+              avatarPath = "/assets/avatar/";
+          } else {
+              fileName = localStorage.getItem("studentAvatar") || "bocahMale.glb";
+              avatarPath = "/assets/avatar/students/";
+          }
          
          console.log(`🎯 Loading ${user.role} avatar: ${avatarPath}${fileName}`);
          
