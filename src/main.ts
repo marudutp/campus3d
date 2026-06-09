@@ -1,17 +1,10 @@
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "./firebase/config";
-
-import { loadStudentDashboard } from "./pages/studentDashboard";
-import { loadTeacherDashboard } from "./pages/teacherDashboard";
-import { loadWaitingRoom } from "./pages/waitingRoom";
-import { loadClassroom } from "./pages/classroom";
+import { User } from "firebase/auth";
+import "./styles/global.css";
 
 import {
   initLanding,
   loadLandingClasses
 } from "./landing";
-
-import { runSeeder } from "./seeder";
 
 // =====================================
 // 🌐 DOM ELEMENTS
@@ -26,8 +19,13 @@ const app =
     "app"
   ) as HTMLElement;
 
+// Page module cache
+let pageModules: any = null;
+let auth: any = null;
+let onAuthStateChanged: any = null;
+
 // =====================================
-// 🚀 INIT APP
+// 🚀 INIT APP (Render Landing First)
 // =====================================
 async function boot() {
   try {
@@ -40,48 +38,62 @@ async function boot() {
   }
 
   initLanding();
+
+  // DEFER: Load Firebase & page modules after landing renders
+  initFirebaseAndModules();
+}
+
+// =====================================
+// ⚡ DEFER FIREBASE + PAGE MODULES
+// =====================================
+async function initFirebaseAndModules() {
+  try {
+    const { auth: firebaseAuth } = await import("./firebase/config");
+    const { onAuthStateChanged: firebaseOnAuthStateChanged } = await import("firebase/auth");
+    
+    auth = firebaseAuth;
+    onAuthStateChanged = firebaseOnAuthStateChanged;
+
+    // Load page modules lazily
+    pageModules = await Promise.all([
+      import("./pages/studentDashboard"),
+      import("./pages/teacherDashboard"),
+      import("./pages/waitingRoom"),
+      import("./pages/classroom")
+    ]);
+
+    // Setup auth listener after modules loaded
+    setupAuthListener();
+  } catch (err) {
+    console.error("❌ Failed to init Firebase/modules:", err);
+  }
+}
+
+// =====================================
+// 🔐 AUTH STATE LISTENER
+// =====================================
+function setupAuthListener() {
+  if (!auth || !onAuthStateChanged) return;
+
+  onAuthStateChanged(
+    auth,
+    async (user: User | null) => {
+      console.log(
+        "🔥 AUTH STATE:",
+        user?.uid || "guest"
+      );
+
+      if (!user) {
+        showLanding();
+        return;
+      }
+
+      await onUserReady(user);
+    }
+  );
 }
 
 boot();
-
-// =====================================
-// 🧪 TEMP SEEDER
-// Jalankan di console:
-// seed()
-// =====================================
-// (window as any).seed = runSeeder;
-
-// =====================================
-// 🔐 AUTH STATE
-// SINGLE ENTRY POINT
-// =====================================
-onAuthStateChanged(
-  auth,
-  async (
-    user: User | null
-  ) => {
-    console.log(
-      "🔥 AUTH STATE:",
-      user?.uid ||
-      "guest"
-    );
-
-    // ===============================
-    // BELUM LOGIN
-    // ===============================
-    if (!user) {
-      showLanding();
-      return;
-    }
-
-    // ===============================
-    // SUDAH LOGIN
-    // ===============================
-    await onUserReady(
-      user
-    );
-  }
-);
 
 // =====================================
 // 👤 USER READY
@@ -109,6 +121,17 @@ async function onUserReady(
     showLanding();
     return;
   }
+
+  // Destructure page modules from cache
+  if (!pageModules) {
+    console.error("❌ Page modules not loaded");
+    return;
+  }
+
+  const { loadStudentDashboard } = pageModules[0];
+  const { loadTeacherDashboard } = pageModules[1];
+  const { loadWaitingRoom } = pageModules[2];
+  const { loadClassroom } = pageModules[3];
 
   // =================================
   // ROUTING CHECK

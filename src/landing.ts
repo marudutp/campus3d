@@ -30,15 +30,25 @@ export function initLanding() {
 }
 
 // =====================================
+// 🔍 DEBOUNCE SEARCH
+// =====================================
+function debounce(func: Function, wait: number) {
+  let timeout: any;
+  return function (...args: any[]) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+// =====================================
 // 🔍 INIT CLASS SEARCH
 // =====================================
 function initClassSearch() {
   const searchInput = document.getElementById("classSearch") as HTMLInputElement;
   if (!searchInput) return;
 
-  searchInput.addEventListener("input", async (e) => {
-    const query = (e.target as HTMLInputElement).value.toLowerCase().trim();
-    
+  // Debounce search 300ms untuk mengurangi rerender
+  const debouncedSearch = debounce(async (query: string) => {
     if (!query) {
       await loadLandingClasses();
       return;
@@ -70,65 +80,58 @@ function initClassSearch() {
     }
 
     filteredClasses.forEach((cls: any) => {
-      const div = document.createElement("div");
-      div.className = "glass-card p-5 rounded-2xl hover:scale-[1.02] transition cursor-pointer";
-      div.innerHTML = `
-        ${cls.teaserUrl && isYoutubeUrl(cls.teaserUrl)
-          ? `
-            <iframe
-              src="${getEmbedUrl(cls.teaserUrl)}"
-              class="w-full h-40 mb-4 rounded-xl"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen>
-            </iframe>
-          `
-          : `
-            <div class="w-full h-40 mb-4 rounded-xl bg-gray-800 flex items-center justify-center text-gray-500">
-              🎥 Teaser segera hadir
-            </div>
-          `
-        }
-
-        <h3 class="text-lg font-bold mb-1">
-          ${cls.title}
-        </h3>
-
-        <p class="text-sm text-gray-400 mb-1">
-          👨‍🏫 ${cls.instructorName || "Pengajar"}
-        </p>
-
-        ${cls.date
-          ? `
-            <p class="text-yellow-400 text-sm mb-2">
-              📅 ${new Date(cls.date).toLocaleDateString("id-ID")}
-            </p>
-          `
-          : ""
-        }
-
-        ${cls.mission
-          ? `
-            <p class="text-gray-400 text-sm mb-3 line-clamp-2">
-              ${cls.mission}
-            </p>
-          `
-          : ""
-        }
-
-        <div class="flex justify-between items-center mt-2">
-          <p class="text-[#00CED1] font-semibold">
-            ${formatRupiah(cls.price)}
-          </p>
-          <span class="text-xs text-green-400">
-            👥 ${cls.students?.length || 0} siswa
-          </span>
-        </div>
-      `;
-
-      div.onclick = () => handleClassClick(cls);
-      container.appendChild(div);
+      renderClassCard(cls, container);
     });
+  }, 300);
+
+  searchInput.addEventListener("input", async (e) => {
+    const query = (e.target as HTMLInputElement).value.toLowerCase().trim();
+    debouncedSearch(query);
   });
+}
+
+// =====================================
+// 🎓 RENDER CLASS CARD (Reusable)
+// =====================================
+function renderClassCard(cls: any, container: HTMLElement) {
+  const div = document.createElement("div");
+  div.className = "glass-card p-5 rounded-2xl hover:scale-[1.02] transition cursor-pointer";
+  
+  // Use placeholder first, lazy load teaser
+  const teaserHtml = cls.teaserUrl && isYoutubeUrl(cls.teaserUrl)
+    ? `<div class="w-full h-40 mb-4 rounded-xl bg-gray-900 flex items-center justify-center text-gray-500" data-teaser="${getEmbedUrl(cls.teaserUrl)}">📺 Loading...</div>`
+    : `<div class="w-full h-40 mb-4 rounded-xl bg-gray-800 flex items-center justify-center text-gray-500">🎥 Teaser segera hadir</div>`;
+
+  div.innerHTML = `
+    ${teaserHtml}
+    <h3 class="text-lg font-bold mb-1">${cls.title}</h3>
+    <p class="text-sm text-gray-400 mb-1">👨‍🏫 ${cls.instructorName || "Pengajar"}</p>
+    ${cls.date ? `<p class="text-yellow-400 text-sm mb-2">📅 ${new Date(cls.date).toLocaleDateString("id-ID")}</p>` : ""}
+    ${cls.mission ? `<p class="text-gray-400 text-sm mb-3 line-clamp-2">${cls.mission}</p>` : ""}
+    <div class="flex justify-between items-center mt-2">
+      <p class="text-[#00CED1] font-semibold">${formatRupiah(cls.price)}</p>
+      <span class="text-xs text-green-400">👥 ${cls.students?.length || 0} siswa</span>
+    </div>
+  `;
+
+  div.onclick = () => handleClassClick(cls);
+  container.appendChild(div);
+
+  // Lazy load teaser iframe after render
+  const teaserDiv = div.querySelector('[data-teaser]') as HTMLElement;
+  if (teaserDiv) {
+    setTimeout(() => {
+      const src = teaserDiv.getAttribute('data-teaser');
+      teaserDiv.innerHTML = `
+        <iframe
+          src="${src}"
+          class="w-full h-40 rounded-xl"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      `;
+    }, 100);
+  }
 }
 
 // =====================================

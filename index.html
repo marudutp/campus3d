@@ -7,60 +7,10 @@
 
   <title>Campus3D — Immersive Learning Platform</title>
 
-  <!-- Tailwind CDN (dev only) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
   <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <style>
-    :root {
-      --primary: #00CED1;
-      --bg-dark: #020617;
-    }
-
-    body {
-      margin: 0;
-      background: var(--bg-dark);
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      color: white;
-      overflow-x: hidden;
-    }
-
-    /* 🔥 APP ROOT */
-    #app {
-      height: 100vh;
-      overflow-y: auto;
-    }
-
-    /* 🔥 LANDING */
-    #landing-page {
-      position: relative;
-      min-height: 100vh;
-      background: radial-gradient(circle at center, #083344 0%, #020617 100%);
-    }
-
-    /* 🔥 GLASS CARD */
-    .glass-card {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    /* 🔥 OVERLAY */
-    #ui-overlay {
-      position: fixed;
-      inset: 0;
-      background: #020617;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-  </style>
+  <!-- Styles (loaded via main.ts) -->
 </head>
 
 <body>
