@@ -126,6 +126,39 @@ export async function loadClassroom() {
       </button>
     </div>
 
+    <!-- Floating Showcase Button (Teacher Only) -->
+    <div
+      id="showcaseControl"
+      class="fixed bottom-6 right-6 z-[900] hidden flex-col gap-2"
+    >
+      <button
+        id="showcaseBtn"
+        class="bg-gradient-to-r from-purple-500 to-pink-500 
+        hover:from-purple-600 hover:to-pink-600
+        px-6 py-3 rounded-full text-white font-bold shadow-2xl
+        transform transition hover:scale-105 flex items-center gap-2"
+      >
+        🎪 Showcase
+      </button>
+      <div
+        id="showcaseMenu"
+        class="bg-black/80 rounded-lg p-3 hidden flex-col gap-2 min-w-[150px]"
+      >
+        <button
+          id="loadEarthBtn"
+          class="bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded text-white text-sm transition"
+        >
+          🌍 Load Earth
+        </button>
+        <button
+          id="removeShowcaseBtn"
+          class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded text-white text-sm transition"
+        >
+          ❌ Remove
+        </button>
+      </div>
+    </div>
+
     <div
       id="loadingText"
       class="absolute inset-0 z-[999]
@@ -181,7 +214,124 @@ export async function loadClassroom() {
       window.location.href = "/dashboard.html";
     };
   }
+
+  // ====================================
+  // SHOWCASE BUTTON - TEACHER ONLY
+  // ====================================
+  const role = localStorage.getItem("role") || "student";
+  const showcaseControl = document.getElementById("showcaseControl");
+  const showcaseBtn = document.getElementById("showcaseBtn");
+  const showcaseMenu = document.getElementById("showcaseMenu");
+  const loadEarthBtn = document.getElementById("loadEarthBtn");
+  const removeShowcaseBtn = document.getElementById("removeShowcaseBtn");
+
+  if (role === "teacher" && showcaseControl) {
+    showcaseControl.classList.remove("hidden");
+    showcaseControl.classList.add("flex");
+
+    // Toggle menu
+    showcaseBtn?.addEventListener("click", () => {
+      showcaseMenu?.classList.toggle("hidden");
+    });
+
+    // Load Earth
+    loadEarthBtn?.addEventListener("click", async () => {
+      const networkManager = (window as any).networkManager;
+      if (networkManager && networkManager.movementSocket) {
+        networkManager.movementSocket.emit("showcase-load", {
+          filename: "earth.glb",
+          userId: user.uid,
+          displayName: user.displayName
+        });
+        console.log("📡 Showcase load event sent: earth.glb");
+      }
+      showcaseMenu?.classList.add("hidden");
+    });
+
+    // Remove Showcase
+    removeShowcaseBtn?.addEventListener("click", async () => {
+      const networkManager = (window as any).networkManager;
+      if (networkManager && networkManager.movementSocket) {
+        networkManager.movementSocket.emit("showcase-remove", {
+          userId: user.uid
+        });
+        console.log("📡 Showcase remove event sent");
+      }
+      showcaseMenu?.classList.add("hidden");
+    });
+  }
+
+  // ====================================
+  // LISTEN FOR SHOWCASE EVENTS (ALL USERS)
+  // ====================================
+  setTimeout(() => {
+    const networkManager = (window as any).networkManager;
+    if (networkManager && networkManager.movementSocket) {
+      const socket = networkManager.movementSocket;
+
+      socket.on("showcase-load", (data: any) => {
+        console.log("📡 Received showcase-load:", data);
+        const scene = (window as any).scene;
+        const showcaseObj = (window as any).showcaseObject;
+
+        if (showcaseObj) {
+          showcaseObj.dispose();
+        }
+
+        loadShowcaseObject(scene, data.filename);
+      });
+
+      socket.on("showcase-remove", () => {
+        console.log("📡 Received showcase-remove");
+        const showcaseObj = (window as any).showcaseObject;
+        if (showcaseObj) {
+          showcaseObj.dispose();
+          (window as any).showcaseObject = null;
+          console.log("✅ Showcase object removed");
+        }
+      });
+    }
+  }, 1000);
 }
+
+// ====================================
+// LOAD SHOWCASE OBJECT
+// ====================================
+async function loadShowcaseObject(scene: any, filename: string) {
+  try {
+    const { SceneLoader } = await import("@babylonjs/core");
+    await import("@babylonjs/loaders/glTF");
+
+    const result = await SceneLoader.ImportMeshAsync(
+      "",
+      "/assets/showcases/",
+      filename,
+      scene
+    );
+
+    const root = result.meshes[0];
+    console.log("✅ Showcase object loaded:", filename);
+
+    // Center dan scale
+    const bounding = root.getHierarchyBoundingVectors(true);
+    const height = bounding.max.y - bounding.min.y;
+    const targetHeight = 5;
+    const scaleFactor = targetHeight / height;
+    root.scaling.setAll(scaleFactor);
+    root.computeWorldMatrix(true);
+
+    // Position di depan kamera
+    root.position.set(0, 1, 5);
+
+    // Simpan reference global
+    (window as any).showcaseObject = root;
+
+    console.log("🎪 Showcase displayed!");
+  } catch (err) {
+    console.error("❌ Failed to load showcase:", err);
+  }
+}
+
 
 // function errorBox(text: string) {
 //   return `

@@ -123,6 +123,7 @@ async function bootstrap(config: {
     const avatarManager = new AvatarManager(scene);
     // 🔥 TAMBAHKAN INI
     (window as any).avatarManager = avatarManager;
+    (window as any).scene = scene;
     const voiceManager = new VoiceManager(scene);
 
     // NetworkManager dengan dual server

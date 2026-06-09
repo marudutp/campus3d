@@ -249,6 +249,14 @@ export class NetworkManager {
         this.movementSocket.on('error_message', (data: { title: string, message: string }) => {
             alert(`${data.title}\n\n${data.message}`);
         });
+
+        this.movementSocket.on('showcase-load', (data: any) => {
+            console.log("📡 NetworkManager received showcase-load:", data);
+        });
+
+        this.movementSocket.on('showcase-remove', (data: any) => {
+            console.log("📡 NetworkManager received showcase-remove");
+        });
     }
     
     private setupAudioSocketListeners() {

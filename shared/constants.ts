@@ -18,7 +18,9 @@ export const NETWORK_EVENTS = {
     WHITEBOARD_CLEAR: "wb-clear",
     WHITEBOARD_SYNC_REQ: "wb-sync-req",
     WHITEBOARD_SYNC_RES: "wb-sync-res",
-    LASER_MOVE: "laser-move"
+    LASER_MOVE: "laser-move",
+    SHOWCASE_LOAD: "showcase-load",
+    SHOWCASE_REMOVE: "showcase-remove"
 };
 
 export const AVATAR_CONFIG = {
